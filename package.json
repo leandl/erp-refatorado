@@ -7,7 +7,10 @@
     "build": "tsup --tsconfig tsconfig.build.json src/main.ts",
     "start": "node dist/main.cjs",
     "dev": "tsx watch src/main.ts",
-    "test": "vitest"
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest --passWithNoTests",
+    "prepare": "husky",
+    "lint": "eslint src/*.ts --fix"
   },
   "keywords": [],
   "author": "",
@@ -19,9 +22,14 @@
     "eslint": "^8.57.1",
     "eslint-plugin-import-sort": "^0.0.0",
     "git-commit-msg-linter": "^5.0.9",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
     "tsup": "^8.5.1",
     "tsx": "^4.23.9",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
+  },
+  "lint-staged": {
+    "*.ts": "npm run lint:fix"
   }
 }
