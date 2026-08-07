@@ -6,11 +6,13 @@
   "scripts": {
     "build": "tsup --tsconfig tsconfig.build.json src/main.ts",
     "start": "node dist/main.cjs",
-    "dev": "tsx watch src/main.ts",
+    "dev": "tsx --env-file .env.dev --watch src/main.ts",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
     "prepare": "husky",
-    "lint:fix": "eslint src/*.ts --fix"
+    "lint:fix": "eslint src/*.ts --fix",
+    "db:migrate": "knex --env-file .env.dev ./node_modules/knex/bin/cli.js migrate:latest",
+    "db:rollback": "knex --env-file .env.dev ./node_modules/knex/bin/cli.js migrate:rollback"
   },
   "keywords": [],
   "author": "",
@@ -23,7 +25,9 @@
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "git-commit-msg-linter": "^5.0.9",
     "husky": "^9.1.7",
+    "knex": "^3.3.0",
     "lint-staged": "^17.3.0",
+    "mysql2": "^3.23.2",
     "tsup": "^8.5.1",
     "tsx": "^4.23.9",
     "typescript": "^6.0.3",
