@@ -11,8 +11,11 @@
     "test:watch": "vitest --passWithNoTests",
     "prepare": "husky",
     "lint:fix": "eslint src/*.ts --fix",
-    "db:migrate": "knex --env-file .env.dev ./node_modules/knex/bin/cli.js migrate:latest",
-    "db:rollback": "knex --env-file .env.dev ./node_modules/knex/bin/cli.js migrate:rollback"
+    "db:migrate": "node --env-file .env.dev ./node_modules/knex/bin/cli.js migrate:latest",
+    "db:rollback": "node --env-file .env.dev ./node_modules/knex/bin/cli.js migrate:rollback",
+    "services:up": "docker compose --env-file .env.dev -f infra/compose.yaml up -d",
+    "services:stop": "docker compose --env-file .env.dev -f infra/compose.yaml stop",
+    "services:down": "docker compose --env-file .env.dev -f infra/compose.yaml down"
   },
   "keywords": [],
   "author": "",
@@ -20,14 +23,18 @@
   "type": "module",
   "devDependencies": {
     "@rocketseat/eslint-config": "^2.2.2",
+    "@types/async-retry": "^1.4.9",
+    "@types/express": "^5.0.6",
     "@types/node": "^24.13.3",
+    "async-retry": "^1.3.3",
+    "axios": "^1.19.0",
     "eslint": "^8.57.1",
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "git-commit-msg-linter": "^5.0.9",
     "husky": "^9.1.7",
     "knex": "^3.3.0",
     "lint-staged": "^17.3.0",
-    "mysql2": "^3.23.2",
+    "mysql2": "^3.23.3",
     "tsup": "^8.5.1",
     "tsx": "^4.23.9",
     "typescript": "^6.0.3",
@@ -35,5 +42,10 @@
   },
   "lint-staged": {
     "*.ts": "npm run lint:fix"
+  },
+  "dependencies": {
+    "@types/cors": "^2.8.19",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
   }
 }

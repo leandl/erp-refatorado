@@ -14,9 +14,11 @@
     "allowImportingTsExtensions": true,
     "types": ["node", "vitest/globals"],
     "paths": {
-      "@*": ["./src/*"]
+     
+      "@infra/*": ["./infra/*"],
+      "@*": ["./src/*"],
     }
   },
-  "include": ["src", "tests"],
+  "include": ["src", "tests", "infra", "knexfile.ts"],
   "exclude": ["node_modules", "dist"]
 }
