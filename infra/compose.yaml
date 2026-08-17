@@ -1,5 +1,6 @@
 services:
   database:
+    container_name: "mariadb-dev"
     image: mariadb:12.3
     restart: on-failure
     environment:

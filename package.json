@@ -6,8 +6,10 @@
   "scripts": {
     "build": "tsup --tsconfig tsconfig.build.json src/main.ts",
     "start": "node dist/main.cjs",
-    "dev": "tsx --env-file .env.dev --watch src/main.ts",
-    "test": "vitest run --passWithNoTests",
+    "dev:app:run": "tsx --env-file .env.dev --watch src/main.ts",
+    "dev": "npm run services:up && npm run services:wait:database && npm run db:migrate && npm run dev:app:run",
+    "test": "npm run services:up && concurrently -n app,test --hide app -k --success command-test \"npm run dev:app:run\" \"vitest run --passWithNoTests\"",
+    "posttest": "npm run services:stop",
     "test:watch": "vitest --passWithNoTests",
     "prepare": "husky",
     "lint:fix": "eslint src/*.ts --fix",
@@ -15,7 +17,8 @@
     "db:rollback": "node --env-file .env.dev ./node_modules/knex/bin/cli.js migrate:rollback",
     "services:up": "docker compose --env-file .env.dev -f infra/compose.yaml up -d",
     "services:stop": "docker compose --env-file .env.dev -f infra/compose.yaml stop",
-    "services:down": "docker compose --env-file .env.dev -f infra/compose.yaml down"
+    "services:down": "docker compose --env-file .env.dev -f infra/compose.yaml down",
+    "services:wait:database": "node ./infra/scripts/wait-for-mariadb.js"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +31,7 @@
     "@types/node": "^24.13.3",
     "async-retry": "^1.3.3",
     "axios": "^1.19.0",
+    "concurrently": "^10.0.5",
     "eslint": "^8.57.1",
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "git-commit-msg-linter": "^5.0.9",
