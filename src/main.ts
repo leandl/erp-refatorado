@@ -1,3 +1,5 @@
+import { changeBank } from '@change-bank.ts'
+import { getById, list, remove, save } from '@database.ts'
 import cors from 'cors'
 import express, { Request, Response } from 'express'
 import mysqlConnection from 'mysql2/promise'
@@ -42,11 +44,9 @@ app.get('/status', async (request: Request, response: Response) => {
 })
 
 app.get('/bank', async (request: Request, response: Response) => {
-  const connection = mysqlConnection.createPool(process.env.DATABASE_URL || '')
-  const [rows] = await connection.query('SELECT * FROM bank')
-  connection.pool.end()
+  const rows = await list()
 
-  const output = (rows as Record<string, unknown>[]).map((bank) => ({
+  const output = rows.map((bank) => ({
     id: bank.bank_id,
     name: bank.name,
     code: bank.code,
@@ -57,96 +57,53 @@ app.get('/bank', async (request: Request, response: Response) => {
 })
 
 app.get('/bank/:bank_id', async (request: Request, response: Response) => {
-  const connection = mysqlConnection.createPool(process.env.DATABASE_URL || '')
-
   const bankId = request.params.bank_id
 
-  const [rows] = await connection.query(
-    'SELECT * FROM bank WHERE bank_id = ?',
-    [bankId],
-  )
-  connection.pool.end()
+  const row = await getById(Number(bankId))
 
-  const output = (rows as Record<string, unknown>[]).map((bank) => ({
-    id: bank.bank_id,
-    name: bank.name,
-    code: bank.code,
-    url: bank.url,
-  }))
-
-  if (output.length > 0) {
-    response.status(200).json(output[0])
-    return
+  if (!row) {
+    return response.status(404).end()
   }
 
-  response.status(404).end()
+  const output = {
+    id: row.bank_id,
+    name: row.name,
+    code: row.code,
+    url: row.url,
+  }
+
+  response.status(200).json(output)
 })
 
 app.post('/bank', async (request: Request, response: Response) => {
   const bankData = request.body
-  const connection = mysqlConnection.createPool(process.env.DATABASE_URL || '')
 
-  const [rows] = (await connection.query(
-    'INSERT INTO bank(code, name, url) VALUES(?, ?, ?)',
-    [bankData.code, bankData.name, bankData.url],
-  )) as unknown as [Record<string, unknown>]
-
-  const bankId = rows.insertId
+  const bankId = await save(bankData)
   const bank = {
     id: bankId,
     ...bankData,
   }
 
-  connection.pool.end()
   response.status(201).json(bank)
 })
 
 app.put('/bank/:bank_id', async (request: Request, response: Response) => {
-  const connection = mysqlConnection.createPool(process.env.DATABASE_URL || '')
-
   const bankId = request.params.bank_id
   const bankData = request.body
 
-  const [rows] = (await connection.query(
-    'SELECT * FROM bank WHERE bank_id = ?',
-    [bankId],
-  )) as unknown as [Array<Record<string, unknown>>]
-
-  if (rows.length === 0) {
-    await connection.end()
-
-    return response.status(404).json({
-      message: 'Bank not found',
-    })
+  const input = {
+    id: Number(bankId),
+    ...bankData,
   }
 
-  const bank = rows[0]
-
-  const code = bankData.code ?? bank.code
-  const name = bankData.name ?? bank.name
-  const url = bankData.url ?? bank.url
-
-  await connection.query(
-    'UPDATE bank SET code = ?, name = ?, url = ? WHERE bank_id = ?',
-    [code, name, url, bankId],
-  )
-
-  await connection.end()
-
-  response.status(200).json({
-    id: Number(bankId),
-    code,
-    name,
-    url,
-  })
+  const output = await changeBank(input)
+  response.status(200).json(output)
 })
-app.delete('/bank/:bank_id', async (request: Request, response: Response) => {
-  const connection = mysqlConnection.createPool(process.env.DATABASE_URL || '')
 
+app.delete('/bank/:bank_id', async (request: Request, response: Response) => {
   const bankId = request.params.bank_id
 
-  await connection.query('DELETE FROM bank WHERE bank_id = ?', [bankId])
-  connection.pool.end()
+  await remove(Number(bankId))
 
   response.status(200).end()
 })

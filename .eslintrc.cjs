@@ -2,6 +2,7 @@ module.exports = {
   extends: ['@rocketseat/eslint-config/node'],
   plugins: ['simple-import-sort'],
   rules: {
+    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
