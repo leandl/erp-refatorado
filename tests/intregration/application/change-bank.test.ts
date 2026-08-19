@@ -1,12 +1,16 @@
+import { BankDAO } from '@bank-dao.ts'
 import { changeBank } from '@change-bank.ts'
-import { getById, save } from '@database.ts'
 
 import { orchestrator } from '../../orchestrator.ts'
+
+let bankDAO: BankDAO
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices()
   await orchestrator.clearDatabase()
   await orchestrator.runPendingMigrations()
+
+  bankDAO = new BankDAO()
 })
 
 test('Should update a bank', async () => {
@@ -16,7 +20,7 @@ test('Should update a bank', async () => {
     url: 'test4.com',
   }
 
-  const bankId = await save(bankInput)
+  const bankId = await bankDAO.save(bankInput)
   const updateInput = {
     code: '553',
     name: 'Test Name Changed',
@@ -31,7 +35,7 @@ test('Should update a bank', async () => {
     }),
   )
 
-  const persistedBank = await getById(bankId)
+  const persistedBank = await bankDAO.getById(bankId)
   expect(persistedBank).toEqual(
     expect.objectContaining({
       bank_id: bankId,
