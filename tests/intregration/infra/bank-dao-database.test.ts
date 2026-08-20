@@ -1,4 +1,4 @@
-import { BankDAO } from '@bank-dao.ts'
+import { BankDAO, BankDAODatabase } from '@bank-dao.ts'
 
 import { orchestrator } from '../../orchestrator.ts'
 
@@ -9,7 +9,7 @@ beforeAll(async () => {
   await orchestrator.clearDatabase()
   await orchestrator.runPendingMigrations()
 
-  bankDAO = new BankDAO()
+  bankDAO = new BankDAODatabase()
 })
 
 test('Should create, retrieve, update, list, and remove a bank', async () => {

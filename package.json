@@ -47,7 +47,7 @@
     "vitest": "^4.1.10"
   },
   "lint-staged": {
-    "*.ts": "npm run lint:fix"
+    "*.ts": "npm run lint:fix --"
   },
   "dependencies": {
     "@types/cors": "^2.8.19",

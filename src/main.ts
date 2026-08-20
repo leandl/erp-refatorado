@@ -1,4 +1,4 @@
-import { BankDAO } from '@bank-dao.ts'
+import { BankDAODatabase } from '@bank-dao.ts'
 import { UpdateBank } from '@update-bank.ts'
 import cors from 'cors'
 import express, { Request, Response } from 'express'
@@ -9,7 +9,7 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-const bankDAO = new BankDAO()
+const bankDAO = new BankDAODatabase()
 
 app.get('/status', async (request: Request, response: Response) => {
   const connection = mysqlConnection.createPool(process.env.DATABASE_URL || '')
