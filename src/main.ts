@@ -1,5 +1,5 @@
 import { BankDAO } from '@bank-dao.ts'
-import { changeBank } from '@change-bank.ts'
+import { UpdateBank } from '@update-bank.ts'
 import cors from 'cors'
 import express, { Request, Response } from 'express'
 import mysqlConnection from 'mysql2/promise'
@@ -8,6 +8,8 @@ const app = express()
 
 app.use(express.json())
 app.use(cors())
+
+const bankDAO = new BankDAO()
 
 app.get('/status', async (request: Request, response: Response) => {
   const connection = mysqlConnection.createPool(process.env.DATABASE_URL || '')
@@ -44,7 +46,6 @@ app.get('/status', async (request: Request, response: Response) => {
 })
 
 app.get('/bank', async (request: Request, response: Response) => {
-  const bankDAO = new BankDAO()
   const rows = await bankDAO.list()
 
   const output = rows.map((bank) => ({
@@ -59,7 +60,7 @@ app.get('/bank', async (request: Request, response: Response) => {
 
 app.get('/bank/:bank_id', async (request: Request, response: Response) => {
   const bankId = request.params.bank_id
-  const bankDAO = new BankDAO()
+
   const row = await bankDAO.getById(Number(bankId))
 
   if (!row) {
@@ -78,7 +79,7 @@ app.get('/bank/:bank_id', async (request: Request, response: Response) => {
 
 app.post('/bank', async (request: Request, response: Response) => {
   const bankData = request.body
-  const bankDAO = new BankDAO()
+
   const bankId = await bankDAO.save(bankData)
   const bank = {
     id: bankId,
@@ -97,14 +98,15 @@ app.put('/bank/:bank_id', async (request: Request, response: Response) => {
     ...bankData,
   }
 
-  const output = await changeBank(input)
+  const usecase = new UpdateBank(bankDAO)
+  const output = await usecase.execute(input)
+
   response.status(200).json(output)
 })
 
 app.delete('/bank/:bank_id', async (request: Request, response: Response) => {
   const bankId = request.params.bank_id
 
-  const bankDAO = new BankDAO()
   await bankDAO.remove(Number(bankId))
 
   response.status(200).end()
