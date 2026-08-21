@@ -1,15 +1,37 @@
 import mysqlConnection from 'mysql2/promise'
 
 export interface BankDAO {
-  save(dto: any): Promise<number>
-  getById(bankId: number): Promise<any>
-  update(dto: any): Promise<void>
-  list(): Promise<any[]>
+  save(dto: BankDAO.SaveDTO): Promise<number>
+  getById(bankId: number): Promise<BankDAO.BankDTO | undefined>
+  update(dto: BankDAO.UpdateDTO): Promise<void>
+  list(): Promise<BankDAO.BankDTO[]>
   remove(bankId: number): Promise<void>
 }
 
+export namespace BankDAO {
+  export type SaveDTO = {
+    code: string
+    name: string
+    url: string
+  }
+
+  export type UpdateDTO = {
+    id: number
+    code: string
+    name: string
+    url: string
+  }
+
+  export type BankDTO = {
+    bank_id: number
+    code: string
+    name: string
+    url: string
+  }
+}
+
 export class BankDAODatabase implements BankDAO {
-  async save(dto: any) {
+  async save(dto: BankDAO.SaveDTO): Promise<number> {
     const connection = mysqlConnection.createPool(
       process.env.DATABASE_URL || '',
     )
@@ -25,7 +47,7 @@ export class BankDAODatabase implements BankDAO {
     return bankId
   }
 
-  async list() {
+  async list(): Promise<BankDAO.BankDTO[]> {
     const connection = mysqlConnection.createPool(
       process.env.DATABASE_URL || '',
     )
@@ -35,7 +57,7 @@ export class BankDAODatabase implements BankDAO {
     return rows
   }
 
-  async getById(bankId: number) {
+  async getById(bankId: number): Promise<BankDAO.BankDTO | undefined> {
     const connection = mysqlConnection.createPool(
       process.env.DATABASE_URL || '',
     )
@@ -49,11 +71,9 @@ export class BankDAODatabase implements BankDAO {
     if (rows.length > 0) {
       return rows[0]
     }
-
-    return null
   }
 
-  async remove(bankId: number) {
+  async remove(bankId: number): Promise<void> {
     const connection = mysqlConnection.createPool(
       process.env.DATABASE_URL || '',
     )
@@ -62,7 +82,7 @@ export class BankDAODatabase implements BankDAO {
     connection.pool.end()
   }
 
-  async update(dto: any) {
+  async update(dto: BankDAO.UpdateDTO): Promise<void> {
     const connection = mysqlConnection.createPool(
       process.env.DATABASE_URL || '',
     )

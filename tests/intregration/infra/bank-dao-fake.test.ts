@@ -1,9 +1,11 @@
-import { BankDAO, BankDAODatabase } from '@bank-dao.ts'
+import { BankDAO } from '@bank-dao.ts'
+
+import { BankDAOFake } from '../../mocks/bank-dao-fake.ts'
 
 let bankDAO: BankDAO
 
 beforeAll(async () => {
-  bankDAO = new BankDAODatabase()
+  bankDAO = new BankDAOFake()
 })
 
 test('Should create, retrieve, update, list, and remove a bank', async () => {

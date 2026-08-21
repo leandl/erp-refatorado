@@ -1,10 +1,10 @@
 import { BankDAO } from '@bank-dao.ts'
 
 export class BankDAOFake implements BankDAO {
-  private banks: Record<number, any> = {}
+  private banks: Record<number, BankDAO.BankDTO> = {}
   private currentID = 1
 
-  async save(dto: any): Promise<number> {
+  async save(dto: BankDAO.SaveDTO): Promise<number> {
     this.banks[this.currentID] = {
       bank_id: this.currentID,
       ...dto,
@@ -13,17 +13,11 @@ export class BankDAOFake implements BankDAO {
     return this.currentID++
   }
 
-  async getById(bankId: number): Promise<any> {
+  async getById(bankId: number): Promise<BankDAO.BankDTO> {
     return this.banks[bankId]
   }
 
-  async update({
-    id: bankId,
-    ...restDTO
-  }: {
-    id: number
-    [key: string]: any
-  }): Promise<void> {
+  async update({ id: bankId, ...restDTO }: BankDAO.UpdateDTO): Promise<void> {
     if (this.banks[bankId]) {
       this.banks[bankId] = {
         ...this.banks[bankId],
@@ -32,7 +26,7 @@ export class BankDAOFake implements BankDAO {
     }
   }
 
-  async list(): Promise<any[]> {
+  async list(): Promise<BankDAO.BankDTO[]> {
     return Object.values(this.banks)
   }
 
