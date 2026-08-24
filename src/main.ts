@@ -1,4 +1,8 @@
 import { BankDAODatabase } from '@bank-dao.ts'
+import { CreateBank } from '@create-bank.ts'
+import { GetBankById } from '@get-bank-by-id.ts'
+import { GetBankList } from '@get-bank-list.ts'
+import { RemoveBank } from '@remove-bank.ts'
 import { UpdateBank } from '@update-bank.ts'
 import cors from 'cors'
 import express, { Request, Response } from 'express'
@@ -46,32 +50,19 @@ app.get('/status', async (request: Request, response: Response) => {
 })
 
 app.get('/bank', async (request: Request, response: Response) => {
-  const rows = await bankDAO.list()
-
-  const output = rows.map((bank) => ({
-    id: bank.bank_id,
-    name: bank.name,
-    code: bank.code,
-    url: bank.url,
-  }))
-
+  const usecase = new GetBankList(bankDAO)
+  const output = await usecase.execute()
   response.status(200).json(output)
 })
 
 app.get('/bank/:bank_id', async (request: Request, response: Response) => {
   const bankId = request.params.bank_id
 
-  const row = await bankDAO.getById(Number(bankId))
+  const usecase = new GetBankById(bankDAO)
+  const output = await usecase.execute(Number(bankId))
 
-  if (!row) {
+  if (!output) {
     return response.status(404).end()
-  }
-
-  const output = {
-    id: row.bank_id,
-    name: row.name,
-    code: row.code,
-    url: row.url,
   }
 
   response.status(200).json(output)
@@ -80,13 +71,10 @@ app.get('/bank/:bank_id', async (request: Request, response: Response) => {
 app.post('/bank', async (request: Request, response: Response) => {
   const bankData = request.body
 
-  const bankId = await bankDAO.save(bankData)
-  const bank = {
-    id: bankId,
-    ...bankData,
-  }
+  const usecase = new CreateBank(bankDAO)
+  const output = await usecase.execute(bankData)
 
-  response.status(201).json(bank)
+  response.status(201).json(output)
 })
 
 app.put('/bank/:bank_id', async (request: Request, response: Response) => {
@@ -107,7 +95,8 @@ app.put('/bank/:bank_id', async (request: Request, response: Response) => {
 app.delete('/bank/:bank_id', async (request: Request, response: Response) => {
   const bankId = request.params.bank_id
 
-  await bankDAO.remove(Number(bankId))
+  const usecase = new RemoveBank(bankDAO)
+  await usecase.execute(Number(bankId))
 
   response.status(200).end()
 })

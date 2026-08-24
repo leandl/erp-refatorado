@@ -220,6 +220,7 @@ test('Should delete a bank (DELETE /bank)', async () => {
     inputCreate,
   )
   const outputCreate = responseCreate.data
+
   const bankId = outputCreate.id
 
   const responseDelete = await axios.delete(
