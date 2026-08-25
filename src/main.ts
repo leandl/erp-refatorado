@@ -1,12 +1,12 @@
 import { BankDAODatabase } from '@bank-dao.ts'
 import { CreateBank } from '@create-bank.ts'
+import { DatabaseStatusDAODatabase } from '@database-status-dao.ts'
 import { GetBankById } from '@get-bank-by-id.ts'
 import { GetBankList } from '@get-bank-list.ts'
 import { RemoveBank } from '@remove-bank.ts'
 import { UpdateBank } from '@update-bank.ts'
 import cors from 'cors'
 import express, { Request, Response } from 'express'
-import mysqlConnection from 'mysql2/promise'
 
 const app = express()
 
@@ -16,35 +16,14 @@ app.use(cors())
 const bankDAO = new BankDAODatabase()
 
 app.get('/status', async (request: Request, response: Response) => {
-  const connection = mysqlConnection.createPool(process.env.DATABASE_URL || '')
-  const [versionResult] = await connection.query('SELECT VERSION() AS version')
+  const databaseStatusDAO = new DatabaseStatusDAODatabase()
 
-  const [maxConnectionsResult] = await connection.query(
-    "SHOW VARIABLES LIKE 'max_connections'",
-  )
-
-  const [openedConnectionsResult] = await connection.query(
-    "SHOW STATUS LIKE 'Threads_connected'",
-  )
-
-  const version = (versionResult as { version: string }[])[0].version
-
-  const maxConnections = Number(
-    (maxConnectionsResult as { Value: string }[])[0].Value,
-  )
-
-  const openedConnections = Number(
-    (openedConnectionsResult as { Value: string }[])[0].Value,
-  )
+  const databaseStatus = databaseStatusDAO.getStatus()
 
   return response.status(200).json({
     updated_at: new Date().toISOString(),
     dependencies: {
-      database: {
-        version,
-        max_connections: maxConnections,
-        opened_connections: openedConnections,
-      },
+      database: databaseStatus,
     },
   })
 })
