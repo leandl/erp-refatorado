@@ -25,7 +25,7 @@ test('Should get bank by id', async () => {
 
   const bankId = await bankDAO.save(bankInput)
 
-  const bank = await sut.execute(bankId)
+  const bank = await sut.execute({ id: bankId })
 
   expect(bank).toEqual({
     id: bankId,
