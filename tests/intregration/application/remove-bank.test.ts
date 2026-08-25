@@ -25,7 +25,7 @@ test('Should create bank ', async () => {
 
   const bankId = await bankDAO.save(bankInput)
 
-  await sut.execute(bankId)
+  await sut.execute({ id: bankId })
 
   const removedBank = await bankDAO.getById(bankId)
 

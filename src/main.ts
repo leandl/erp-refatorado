@@ -75,7 +75,7 @@ app.delete('/bank/:bank_id', async (request: Request, response: Response) => {
   const bankId = request.params.bank_id
 
   const usecase = new RemoveBank(bankDAO)
-  await usecase.execute(Number(bankId))
+  await usecase.execute({ id: Number(bankId) })
 
   response.status(200).end()
 })
