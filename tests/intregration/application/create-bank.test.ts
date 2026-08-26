@@ -32,3 +32,16 @@ test('Should create bank ', async () => {
     ...restSavedBank,
   })
 })
+
+test.each(['', undefined, null, 'Test'])(
+  'Should not create a bank with an invalid name %s',
+  async (rawName: unknown) => {
+    const inputCreate = {
+      code: '555',
+      name: rawName as string,
+      url: 'test4.com',
+    }
+
+    await expect(sut.execute(inputCreate)).rejects.toThrow('Invalid name')
+  },
+)

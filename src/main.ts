@@ -48,12 +48,18 @@ app.get('/bank/:bank_id', async (request: Request, response: Response) => {
 })
 
 app.post('/bank', async (request: Request, response: Response) => {
-  const bankData = request.body
+  const input = request.body
 
   const usecase = new CreateBank(bankDAO)
-  const output = await usecase.execute(bankData)
 
-  response.status(201).json(output)
+  try {
+    const output = await usecase.execute(input)
+    response.status(201).json(output)
+  } catch (error: any) {
+    return response.status(422).json({
+      message: error.message,
+    })
+  }
 })
 
 app.put('/bank/:bank_id', async (request: Request, response: Response) => {
@@ -63,6 +69,10 @@ app.put('/bank/:bank_id', async (request: Request, response: Response) => {
   const input = {
     id: Number(bankId),
     ...bankData,
+  }
+
+  if (!input.name || !input.name.match(/^.+\s.+$/)) {
+    return response.status(422).json({ message: 'Invalid name' })
   }
 
   const usecase = new UpdateBank(bankDAO)

@@ -103,27 +103,27 @@ test('Should create a bank (POST /bank)', async () => {
   await axios.delete(`${webserver.origin}/bank/${outputCreate.id}`)
 })
 
-// test.each([''])(
-//   'Should not create a bank with an invalid name %s (POST /bank)',
-//   async (rawName: string) => {
-//     const inputCreate = {
-//       code: '555',
-//       name: rawName,
-//       url: 'test4.com',
-//     }
+test.each(['', undefined, null, 'Test'])(
+  'Should not create a bank with an invalid name %s (POST /bank)',
+  async (rawName: unknown) => {
+    const inputCreate = {
+      code: '555',
+      name: rawName,
+      url: 'test4.com',
+    }
 
-//     const responseCreate = await axios.post(
-//       `${webserver.origin}/bank`,
-//       inputCreate,
-//     )
+    const responseCreate = await axios.post(
+      `${webserver.origin}/bank`,
+      inputCreate,
+    )
 
-//     expect(responseCreate.status).toBe(422)
+    expect(responseCreate.status).toBe(422)
 
-//     const outputCreate = responseCreate.data
+    const outputCreate = responseCreate.data
 
-//     expect(outputCreate.message).toBe('Invalid name')
-//   },
-// )
+    expect(outputCreate.message).toBe('Invalid name')
+  },
+)
 
 test('Should update a bank (PUT /bank)', async () => {
   const inputCreate = {
@@ -171,42 +171,42 @@ test('Should update a bank (PUT /bank)', async () => {
   await axios.delete(`${webserver.origin}/bank/${outputCreate.id}`)
 })
 
-// test.each(['Test'])(
-//   'Should not update a bank with an invalid name %s (PUT /bank)',
-//   async (rawName: string) => {
-//     const inputCreate = {
-//       code: '553',
-//       name: 'Test Name',
-//       url: 'test4.com',
-//     }
+test.each(['', undefined, null, 'Test'])(
+  'Should not update a bank with an invalid name %s (PUT /bank)',
+  async (rawName: unknown) => {
+    const inputCreate = {
+      code: '553',
+      name: 'Test Name',
+      url: 'test4.com',
+    }
 
-//     const responseCreate = await axios.post(
-//       `${webserver.origin}/bank`,
-//       inputCreate,
-//     )
-//     const outputCreate = responseCreate.data
-//     const bankId = outputCreate.id
+    const responseCreate = await axios.post(
+      `${webserver.origin}/bank`,
+      inputCreate,
+    )
+    const outputCreate = responseCreate.data
+    const bankId = outputCreate.id
 
-//     const inputUpdate = {
-//       code: '553',
-//       name: rawName,
-//       url: 'test4.changed.com',
-//     }
+    const inputUpdate = {
+      code: '553',
+      name: rawName,
+      url: 'test4.changed.com',
+    }
 
-//     const responseUpdate = await axios.put(
-//       `${webserver.origin}/bank/${bankId}`,
-//       inputUpdate,
-//     )
+    const responseUpdate = await axios.put(
+      `${webserver.origin}/bank/${bankId}`,
+      inputUpdate,
+    )
 
-//     expect(responseUpdate.status).toBe(422)
+    expect(responseUpdate.status).toBe(422)
 
-//     const outputUpdate = responseUpdate.data
+    const outputUpdate = responseUpdate.data
 
-//     expect(outputUpdate.message).toBe('Invalid name')
+    expect(outputUpdate.message).toBe('Invalid name')
 
-//     await axios.delete(`${webserver.origin}/bank/${outputCreate.id}`)
-//   },
-// )
+    await axios.delete(`${webserver.origin}/bank/${outputCreate.id}`)
+  },
+)
 
 test('Should delete a bank (DELETE /bank)', async () => {
   const inputCreate = {
