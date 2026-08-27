@@ -125,6 +125,36 @@ test.each(['', undefined, null, 'Test'])(
   },
 )
 
+test.each([
+  '',
+  undefined,
+  null,
+  'Test',
+  '1',
+  '01',
+  '1111',
+  'ABC',
+  'A12',
+  '!@1',
+])(
+  'Should not create a bank with an invalid code %s (POST /bank)',
+  async (invalidCode: unknown) => {
+    const inputCreate = {
+      code: invalidCode,
+      name: 'Test Name',
+      url: 'test4.com',
+    }
+
+    const responseCreate = await axios.post(
+      `${webserver.origin}/bank`,
+      inputCreate,
+    )
+
+    expect(responseCreate.status).toBe(422)
+    expect(responseCreate.data.message).toBe('Invalid code')
+  },
+)
+
 test('Should update a bank (PUT /bank)', async () => {
   const inputCreate = {
     code: '553',
@@ -207,6 +237,66 @@ test.each(['', undefined, null, 'Test'])(
     await axios.delete(`${webserver.origin}/bank/${outputCreate.id}`)
   },
 )
+
+test.each([
+  '',
+  undefined,
+  null,
+  'Test',
+  '1',
+  '01',
+  '1111',
+  'ABC',
+  'A12',
+  '!@1',
+])(
+  'Should not update a bank with an invalid code %s (PUT /bank)',
+  async (invalidCode: unknown) => {
+    const inputCreate = {
+      code: '553',
+      name: 'Test Name',
+      url: 'test4.com',
+    }
+
+    const responseCreate = await axios.post(
+      `${webserver.origin}/bank`,
+      inputCreate,
+    )
+    const bankId = responseCreate.data.id
+
+    const inputUpdate = {
+      code: invalidCode,
+      name: 'Test Name Changed',
+      url: 'test4.changed.com',
+    }
+
+    const responseUpdate = await axios.put(
+      `${webserver.origin}/bank/${bankId}`,
+      inputUpdate,
+    )
+
+    expect(responseUpdate.status).toBe(422)
+    expect(responseUpdate.data.message).toBe('Invalid code')
+
+    await axios.delete(`${webserver.origin}/bank/${bankId}`)
+  },
+)
+
+test('Should not update a bank that does not exist (PUT /bank)', async () => {
+  const inputUpdate = {
+    code: '553',
+    name: 'Test Name Changed',
+    url: 'test4.changed.com',
+  }
+
+  const responseUpdate = await axios.put(
+    `${webserver.origin}/bank/999999`,
+    inputUpdate,
+  )
+
+  expect(responseUpdate.status).toBe(404)
+  expect(responseUpdate.data.message).toBe('Bank not found')
+})
 
 test('Should delete a bank (DELETE /bank)', async () => {
   const inputCreate = {

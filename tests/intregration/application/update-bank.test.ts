@@ -105,3 +105,14 @@ test.each([
     await bankDAO.remove(bankId)
   },
 )
+
+test('Should not update a bank that does not exist', async () => {
+  const inputUpdate = {
+    id: 9_999_999,
+    code: '553',
+    name: 'Test Name',
+    url: 'test4.com',
+  }
+
+  await expect(sut.execute(inputUpdate)).rejects.toThrow('Bank not found')
+})
