@@ -48,3 +48,26 @@ test('Should update a bank', async () => {
 
   await bankDAO.remove(bankId)
 })
+
+test.each(['', undefined, null, 'Test'])(
+  'Should not create a bank with an invalid name %s',
+  async (rawName: unknown) => {
+    const bankInput = {
+      code: '553',
+      name: 'Test Name',
+      url: 'test4.com',
+    }
+
+    const bankId = await bankDAO.save(bankInput)
+
+    const inputUpdate = {
+      id: bankId,
+      code: '555',
+      name: rawName as string,
+      url: 'test4.com',
+    }
+
+    await expect(sut.execute(inputUpdate)).rejects.toThrow('Invalid name')
+    await bankDAO.remove(bankId)
+  },
+)

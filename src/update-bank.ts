@@ -8,6 +8,10 @@ export class UpdateBank implements UseCase<
   constructor(private bankDAO: BankDAO) {}
 
   async execute(input: UpdateBank.Input): Promise<UpdateBank.Output> {
+    if (!input.name || !input.name.match(/^.+\s.+$/)) {
+      throw new Error('Invalid name')
+    }
+
     const bank = await this.bankDAO.getById(input.id)!
 
     const code = input.code ?? bank!.code

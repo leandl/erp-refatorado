@@ -45,3 +45,27 @@ test.each(['', undefined, null, 'Test'])(
     await expect(sut.execute(inputCreate)).rejects.toThrow('Invalid name')
   },
 )
+
+test.each([
+  '',
+  undefined,
+  null,
+  'Test',
+  '1',
+  '01',
+  '1111',
+  'ABC',
+  'A12',
+  '!@1',
+])(
+  'Should not create a bank with an invalid code %s',
+  async (invalidCode: unknown) => {
+    const inputCreate = {
+      code: invalidCode as string,
+      name: 'test 24',
+      url: 'test4.com',
+    }
+
+    await expect(sut.execute(inputCreate)).rejects.toThrow('Invalid code')
+  },
+)

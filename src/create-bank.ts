@@ -12,6 +12,10 @@ export class CreateBank implements UseCase<
       throw new Error('Invalid name')
     }
 
+    if (!input.code || input.code.length !== 3 || !input.code.match(/\d{3}/)) {
+      throw new Error('Invalid code')
+    }
+
     const bankId = await this.bankDAO.save(input)
     const bank = {
       id: bankId,

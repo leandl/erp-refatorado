@@ -71,14 +71,16 @@ app.put('/bank/:bank_id', async (request: Request, response: Response) => {
     ...bankData,
   }
 
-  if (!input.name || !input.name.match(/^.+\s.+$/)) {
-    return response.status(422).json({ message: 'Invalid name' })
-  }
-
   const usecase = new UpdateBank(bankDAO)
-  const output = await usecase.execute(input)
 
-  response.status(200).json(output)
+  try {
+    const output = await usecase.execute(input)
+    response.status(200).json(output)
+  } catch (error: any) {
+    return response.status(422).json({
+      message: error.message,
+    })
+  }
 })
 
 app.delete('/bank/:bank_id', async (request: Request, response: Response) => {
