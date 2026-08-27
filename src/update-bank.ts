@@ -12,6 +12,10 @@ export class UpdateBank implements UseCase<
       throw new Error('Invalid name')
     }
 
+    if (!input.code || input.code.length !== 3 || !input.code.match(/\d{3}/)) {
+      throw new Error('Invalid code')
+    }
+
     const bank = await this.bankDAO.getById(input.id)!
 
     const code = input.code ?? bank!.code
