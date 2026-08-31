@@ -17,16 +17,18 @@ afterEach(() => {
 })
 
 test('Should get bank list', async () => {
+  const fakeCode1 = `${Math.random()}`.substring(2, 5)
   const bankInput1 = {
-    code: '111',
+    code: fakeCode1,
     name: 'Test Name 1',
     url: 'test1.com',
   }
 
   const bankId1 = await bankDAO.save(bankInput1)
 
+  const fakeCode2 = `${Math.random()}`.substring(2, 5)
   const bankInput2 = {
-    code: '222',
+    code: fakeCode2,
     name: 'Test Name 2',
     url: 'test2.com',
   }

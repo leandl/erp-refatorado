@@ -3,6 +3,7 @@ import mysqlConnection from 'mysql2/promise'
 export interface BankDAO {
   save(dto: BankDAO.SaveDTO): Promise<number>
   getById(bankId: number): Promise<BankDAO.BankDTO | undefined>
+  getByCode(code: string): Promise<BankDAO.BankDTO | undefined>
   update(dto: BankDAO.UpdateDTO): Promise<void>
   list(): Promise<BankDAO.BankDTO[]>
   remove(bankId: number): Promise<void>
@@ -65,6 +66,22 @@ export class BankDAODatabase implements BankDAO {
     const [rows] = await connection.query<any[]>(
       'SELECT * FROM bank WHERE bank_id = ?',
       [bankId],
+    )
+    connection.pool.end()
+
+    if (rows.length > 0) {
+      return rows[0]
+    }
+  }
+
+  async getByCode(code: string): Promise<BankDAO.BankDTO | undefined> {
+    const connection = mysqlConnection.createPool(
+      process.env.DATABASE_URL || '',
+    )
+
+    const [rows] = await connection.query<any[]>(
+      'SELECT * FROM bank WHERE code = ?',
+      [code],
     )
     connection.pool.end()
 

@@ -7,14 +7,16 @@ beforeAll(async () => {
 })
 
 test('Should create, retrieve, update, list, and remove a bank', async () => {
+  const fakeCode1 = `${Math.random()}`.substring(2, 5)
   const TEST_DATA_ORIGINAL = {
-    code: '123',
+    code: fakeCode1,
     name: 'Test',
     url: 'test.com.br',
   }
 
+  const fakeCode2 = `${Math.random()}`.substring(2, 5)
   const TEST_DATA_UPDATED = {
-    code: '111',
+    code: fakeCode2,
     name: 'Test1',
     url: 'test1.com.br',
   }
@@ -67,4 +69,44 @@ test('Should create, retrieve, update, list, and remove a bank', async () => {
   bank = bankList.find((bankData) => bankData.bank_id === bankId)
 
   expect(bank).toBeFalsy()
+})
+
+test('Should retrieve a bank by code', async () => {
+  const fakeCode = `${Math.random()}`.substring(2, 5)
+  const input = {
+    code: fakeCode,
+    name: 'Bank Test',
+    url: 'bank.com.br',
+  }
+
+  const bankId = await bankDAO.save(input)
+
+  const bank = await bankDAO.getByCode(input.code)
+
+  expect(bank).toBeTruthy()
+  expect(bank).toMatchObject({
+    bank_id: bankId,
+    ...input,
+  })
+
+  await bankDAO.remove(bankId)
+})
+
+test('Should return undefined when retrieving a non-existent bank by code', async () => {
+  const fakeCode = `${Math.random()}`.substring(2, 5)
+
+  let bank = await bankDAO.getByCode(fakeCode)
+  expect(bank).toBeUndefined()
+
+  const input = {
+    code: fakeCode,
+    name: 'Bank Test',
+    url: 'bank.com.br',
+  }
+
+  const bankId = await bankDAO.save(input)
+  await bankDAO.remove(bankId)
+
+  bank = await bankDAO.getByCode(fakeCode)
+  expect(bank).toBeUndefined()
 })

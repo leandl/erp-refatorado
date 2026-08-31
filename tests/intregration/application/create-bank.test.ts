@@ -17,8 +17,9 @@ afterEach(() => {
 })
 
 test('Should create bank ', async () => {
+  const fakeCode = `${Math.random()}`.substring(2, 5)
   const bankInput = {
-    code: '111',
+    code: fakeCode,
     name: 'Test Name 1',
     url: 'test1.com',
   }
@@ -36,8 +37,9 @@ test('Should create bank ', async () => {
 test.each(['', undefined, null, 'Test'])(
   'Should not create a bank with an invalid name %s',
   async (rawName: unknown) => {
+    const fakeCode = `${Math.random()}`.substring(2, 5)
     const inputCreate = {
-      code: '555',
+      code: fakeCode,
       name: rawName as string,
       url: 'test4.com',
     }
@@ -69,3 +71,21 @@ test.each([
     await expect(sut.execute(inputCreate)).rejects.toThrow('Invalid code')
   },
 )
+
+test('Should not create two banks with the same code', async () => {
+  const fakeCode = `${Math.random()}`.substring(2, 5)
+  const input = {
+    code: fakeCode,
+    name: 'Banco Teste',
+    url: 'teste.com',
+  }
+
+  await sut.execute(input)
+
+  await expect(
+    sut.execute({
+      ...input,
+      name: 'Outro Banco',
+    }),
+  ).rejects.toThrow('Bank code already exists')
+})

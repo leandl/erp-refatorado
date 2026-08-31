@@ -17,15 +17,18 @@ afterEach(() => {
 })
 
 test('Should update a bank', async () => {
+  const fakeCode1 = `${Math.random()}`.substring(2, 5)
   const bankInput = {
-    code: '553',
+    code: fakeCode1,
     name: 'Test Name',
     url: 'test4.com',
   }
 
   const bankId = await bankDAO.save(bankInput)
+
+  const fakeCode2 = `${Math.random()}`.substring(2, 5)
   const updateInput = {
-    code: '553',
+    code: fakeCode2,
     name: 'Test Name Changed',
     url: 'test4.changed.com',
   }
@@ -52,17 +55,19 @@ test('Should update a bank', async () => {
 test.each(['', undefined, null, 'Test'])(
   'Should not update a bank with an invalid name %s',
   async (rawName: unknown) => {
+    const fakeCode1 = `${Math.random()}`.substring(2, 5)
     const bankInput = {
-      code: '553',
+      code: fakeCode1,
       name: 'Test Name',
       url: 'test4.com',
     }
 
     const bankId = await bankDAO.save(bankInput)
 
+    const fakeCode2 = `${Math.random()}`.substring(2, 5)
     const inputUpdate = {
       id: bankId,
-      code: '555',
+      code: fakeCode2,
       name: rawName as string,
       url: 'test4.com',
     }
@@ -86,8 +91,9 @@ test.each([
 ])(
   'Should not update a bank with an invalid code %s',
   async (invalidCode: unknown) => {
+    const fakeCode = `${Math.random()}`.substring(2, 5)
     const bankInput = {
-      code: '553',
+      code: fakeCode,
       name: 'Test Name',
       url: 'test4.com',
     }
@@ -107,9 +113,10 @@ test.each([
 )
 
 test('Should not update a bank that does not exist', async () => {
+  const fakeCode = `${Math.random()}`.substring(2, 5)
   const inputUpdate = {
     id: 9_999_999,
-    code: '553',
+    code: fakeCode,
     name: 'Test Name',
     url: 'test4.com',
   }

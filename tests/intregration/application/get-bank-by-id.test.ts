@@ -17,8 +17,9 @@ afterEach(() => {
 })
 
 test('Should get bank by id', async () => {
+  const fakeCode = `${Math.random()}`.substring(2, 5)
   const bankInput = {
-    code: '111',
+    code: fakeCode,
     name: 'Test Name 1',
     url: 'test1.com',
   }
