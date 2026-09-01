@@ -6,8 +6,28 @@ export class BankDAOFake implements BankDAO {
 
   private currentID = 1
 
-  generateIndex(type: 'CODE', value: string) {
+  generateKeyIndex(type: 'CODE' | 'NAME', value: string) {
     return `${type}:${value}`
+  }
+
+  createIndexs(bankId: number) {
+    const bank = this.banks[bankId]
+    if (!bank) {
+      throw new Error('Bank not found')
+    }
+
+    this.indexs[this.generateKeyIndex('CODE', bank.code)] = bankId
+    this.indexs[this.generateKeyIndex('NAME', bank.name)] = bankId
+  }
+
+  deleteIndexs(bankId: number) {
+    const bank = this.banks[bankId]
+    if (!bank) {
+      throw new Error('Bank not found')
+    }
+
+    delete this.indexs[this.generateKeyIndex('CODE', bank.code)]
+    delete this.indexs[this.generateKeyIndex('NAME', bank.name)]
   }
 
   async save(dto: BankDAO.SaveDTO): Promise<number> {
@@ -16,8 +36,7 @@ export class BankDAOFake implements BankDAO {
       ...dto,
     }
 
-    const codeIndex = this.generateIndex('CODE', dto.code)
-    this.indexs[codeIndex] = this.currentID
+    this.createIndexs(this.currentID)
 
     return this.currentID++
   }
@@ -27,18 +46,27 @@ export class BankDAOFake implements BankDAO {
   }
 
   async getByCode(code: string): Promise<BankDAO.BankDTO | undefined> {
-    const codeIndex = this.generateIndex('CODE', code)
+    const codeIndex = this.generateKeyIndex('CODE', code)
     const bankId = this.indexs[codeIndex]
+
+    return this.getById(bankId)
+  }
+
+  async getByName(name: string): Promise<BankDAO.BankDTO | undefined> {
+    const nameIndex = this.generateKeyIndex('NAME', name)
+    const bankId = this.indexs[nameIndex]
 
     return this.getById(bankId)
   }
 
   async update({ id: bankId, ...restDTO }: BankDAO.UpdateDTO): Promise<void> {
     if (this.banks[bankId]) {
+      this.deleteIndexs(bankId)
       this.banks[bankId] = {
         ...this.banks[bankId],
         ...restDTO,
       }
+      this.createIndexs(bankId)
     }
   }
 
@@ -48,11 +76,8 @@ export class BankDAOFake implements BankDAO {
 
   async remove(bankId: number): Promise<void> {
     if (this.banks[bankId]) {
-      const code = this.banks[bankId].code
-      const codeIndex = this.generateIndex('CODE', code)
-
+      this.deleteIndexs(bankId)
       delete this.banks[bankId]
-      delete this.indexs[codeIndex]
     }
   }
 }

@@ -110,3 +110,46 @@ test('Should return undefined when retrieving a non-existent bank by code', asyn
   bank = await bankDAO.getByCode(fakeCode)
   expect(bank).toBeUndefined()
 })
+
+test('Should retrieve a bank by name', async () => {
+  const fakeCode = `${Math.random()}`.substring(2, 5)
+  const fakeName = `Test ${Math.random()}`
+
+  const input = {
+    code: fakeCode,
+    name: fakeName,
+    url: 'bank.com.br',
+  }
+
+  const bankId = await bankDAO.save(input)
+
+  const bank = await bankDAO.getByName(input.name)
+
+  expect(bank).toBeTruthy()
+  expect(bank).toMatchObject({
+    bank_id: bankId,
+    ...input,
+  })
+
+  await bankDAO.remove(bankId)
+})
+
+test('Should return undefined when retrieving a non-existent bank by code', async () => {
+  const fakeCode = `${Math.random()}`.substring(2, 5)
+  const fakeName = `Test ${Math.random()}`
+
+  let bank = await bankDAO.getByName(fakeName)
+  expect(bank).toBeUndefined()
+
+  const input = {
+    code: fakeCode,
+    name: fakeName,
+    url: 'bank.com.br',
+  }
+
+  const bankId = await bankDAO.save(input)
+  await bankDAO.remove(bankId)
+
+  bank = await bankDAO.getByName(fakeName)
+  expect(bank).toBeUndefined()
+})

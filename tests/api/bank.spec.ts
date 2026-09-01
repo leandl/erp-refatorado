@@ -17,9 +17,10 @@ interface Bank {
 
 test('Should return the list of banks (GET /bank)', async () => {
   const fakeCode = `${Math.random()}`.substring(2, 5)
+  const fakeName = `Test ${Math.random()}`
   const inputCreate = {
     code: fakeCode,
-    name: 'Test List',
+    name: fakeName,
     url: 'test_list.com',
   }
 
@@ -48,9 +49,10 @@ test('Should return the list of banks (GET /bank)', async () => {
 
 test('Should return a bank (GET /bank/:ID)', async () => {
   const fakeCode = `${Math.random()}`.substring(2, 5)
+  const fakeName = `Test ${Math.random()}`
   const inputCreate = {
     code: fakeCode,
-    name: 'Test Get One',
+    name: fakeName,
     url: 'test_one.com',
   }
 
@@ -75,9 +77,10 @@ test('Should return a bank (GET /bank/:ID)', async () => {
 
 test('Should create a bank (POST /bank)', async () => {
   const fakeCode = `${Math.random()}`.substring(2, 5)
+  const fakeName = `Test ${Math.random()}`
   const inputCreate = {
     code: fakeCode,
-    name: 'Test Name',
+    name: fakeName,
     url: 'test4.com',
   }
 
@@ -143,9 +146,10 @@ test.each([
 ])(
   'Should not create a bank with an invalid code %s (POST /bank)',
   async (invalidCode: unknown) => {
+    const fakeName = `Test ${Math.random()}`
     const inputCreate = {
       code: invalidCode,
-      name: 'Test Name',
+      name: fakeName,
       url: 'test4.com',
     }
 
@@ -161,9 +165,11 @@ test.each([
 
 test('Should update a bank (PUT /bank)', async () => {
   const fakeCode1 = `${Math.random()}`.substring(2, 5)
+  const fakeName1 = `Test ${Math.random()}`
+
   const inputCreate = {
     code: fakeCode1,
-    name: 'Test Name',
+    name: fakeName1,
     url: 'test4.com',
   }
 
@@ -175,9 +181,11 @@ test('Should update a bank (PUT /bank)', async () => {
   const bankId = outputCreate.id
 
   const fakeCode2 = `${Math.random()}`.substring(2, 5)
+  const fakeName2 = `Test ${Math.random()}`
+
   const inputUpdate = {
     code: fakeCode2,
-    name: 'Test Name Changed',
+    name: fakeName2,
     url: 'test4.changed.com',
   }
 
@@ -211,9 +219,10 @@ test.each(['', undefined, null, 'Test'])(
   'Should not update a bank with an invalid name %s (PUT /bank)',
   async (rawName: unknown) => {
     const fakeCode1 = `${Math.random()}`.substring(2, 5)
+    const fakeName1 = `Test ${Math.random()}`
     const inputCreate = {
       code: fakeCode1,
-      name: 'Test Name',
+      name: fakeName1,
       url: 'test4.com',
     }
 
@@ -261,9 +270,10 @@ test.each([
   'Should not update a bank with an invalid code %s (PUT /bank)',
   async (invalidCode: unknown) => {
     const fakeCode = `${Math.random()}`.substring(2, 5)
+    const fakeName1 = `Test ${Math.random()}`
     const inputCreate = {
       code: fakeCode,
-      name: 'Test Name',
+      name: fakeName1,
       url: 'test4.com',
     }
 
@@ -273,9 +283,11 @@ test.each([
     )
     const bankId = responseCreate.data.id
 
+    const fakeName2 = `Test ${Math.random()}`
+
     const inputUpdate = {
       code: invalidCode,
-      name: 'Test Name Changed',
+      name: fakeName2,
       url: 'test4.changed.com',
     }
 
@@ -293,9 +305,10 @@ test.each([
 
 test('Should not update a bank that does not exist (PUT /bank)', async () => {
   const fakeCode = `${Math.random()}`.substring(2, 5)
+  const fakeName = `Test ${Math.random()}`
   const inputUpdate = {
     code: fakeCode,
-    name: 'Test Name Changed',
+    name: fakeName,
     url: 'test4.changed.com',
   }
 
@@ -310,9 +323,10 @@ test('Should not update a bank that does not exist (PUT /bank)', async () => {
 
 test('Should delete a bank (DELETE /bank)', async () => {
   const fakeCode = `${Math.random()}`.substring(2, 5)
+  const fakeName = `Test ${Math.random()}`
   const inputCreate = {
     code: fakeCode,
-    name: 'Test Name Delete',
+    name: fakeName,
     url: 'test_delete.com',
   }
 

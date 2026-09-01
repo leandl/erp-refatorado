@@ -1,19 +1,14 @@
 import { BankDAO } from '@bank-dao.ts'
 import { CreateBank } from '@create-bank.ts'
-import Sinon from 'sinon'
 
 import { BankDAOFake } from '../../mocks/bank-dao-fake.ts'
 
 let bankDAO: BankDAO
 let sut: CreateBank
 
-beforeAll(() => {
+beforeEach(() => {
   bankDAO = new BankDAOFake()
   sut = new CreateBank(bankDAO)
-})
-
-afterEach(() => {
-  Sinon.restore()
 })
 
 test('Should create bank ', async () => {
@@ -88,4 +83,24 @@ test('Should not create two banks with the same code', async () => {
       name: 'Outro Banco',
     }),
   ).rejects.toThrow('Bank code already exists')
+})
+
+test('Should not create two banks with the same name', async () => {
+  const fakeCode1 = `${Math.random()}`.substring(2, 5)
+  const fakeCode2 = `${Math.random()}`.substring(2, 5)
+  const fakeName = `Name ${Math.random()}`
+  const input = {
+    code: fakeCode1,
+    name: fakeName,
+    url: 'teste.com',
+  }
+
+  await sut.execute(input)
+
+  await expect(
+    sut.execute({
+      ...input,
+      code: fakeCode2,
+    }),
+  ).rejects.toThrow('Bank name already exists')
 })
