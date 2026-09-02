@@ -21,6 +21,20 @@ export class UpdateBank implements UseCase<
       throw new Error('Bank not found')
     }
 
+    if (bank.code !== input.code) {
+      const alreadyExistsWithCode = await this.bankDAO.getByCode(input.code)
+      if (alreadyExistsWithCode) {
+        throw new Error('Bank code already exists')
+      }
+    }
+
+    if (bank.name !== input.name) {
+      const alreadyExistsWithName = await this.bankDAO.getByName(input.name)
+      if (alreadyExistsWithName) {
+        throw new Error('Bank name already exists')
+      }
+    }
+
     const code = input.code ?? bank!.code
     const name = input.name ?? bank!.name
     const url = input.url ?? bank!.url

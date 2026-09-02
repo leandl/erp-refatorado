@@ -163,6 +163,78 @@ test.each([
   },
 )
 
+test('Should not create a bank with an existing code (POST /bank)', async () => {
+  const fakeCode = `${Math.random()}`.substring(2, 5)
+  const fakeName1 = `Test ${Math.random()}`
+
+  const firstBankInput = {
+    code: fakeCode,
+    name: fakeName1,
+    url: 'test4.com',
+  }
+
+  const responseCreate = await axios.post(
+    `${webserver.origin}/bank`,
+    firstBankInput,
+  )
+
+  expect(responseCreate.status).toBe(201)
+
+  const fakeName2 = `Test ${Math.random()}`
+
+  const secondBankInput = {
+    code: fakeCode,
+    name: fakeName2,
+    url: 'test4.changed.com',
+  }
+
+  const responseDuplicate = await axios.post(
+    `${webserver.origin}/bank`,
+    secondBankInput,
+  )
+
+  expect(responseDuplicate.status).toBe(422)
+  expect(responseDuplicate.data.message).toBe('Bank code already exists')
+
+  await axios.delete(`${webserver.origin}/bank/${responseCreate.data.id}`)
+})
+
+test('Should not create a bank with an existing name (POST /bank)', async () => {
+  const fakeCode1 = `${Math.random()}`.substring(2, 5)
+  const fakeName = `Test ${Math.random()}`
+
+  const firstBankInput = {
+    code: fakeCode1,
+    name: fakeName,
+    url: 'test4.com',
+  }
+
+  const responseCreate = await axios.post(
+    `${webserver.origin}/bank`,
+    firstBankInput,
+  )
+
+  expect(responseCreate.status).toBe(201)
+
+  const fakeCode2 = `${Math.random()}`.substring(2, 5)
+
+  const secondBankInput = {
+    code: fakeCode2,
+    name: fakeName,
+    url: 'test4.changed.com',
+  }
+
+  const responseDuplicate = await axios.post(
+    `${webserver.origin}/bank`,
+    secondBankInput,
+  )
+
+  expect(responseDuplicate.status).toBe(422)
+  expect(responseDuplicate.data.message).toBe('Bank name already exists')
+
+  await axios.delete(`${webserver.origin}/bank/${responseCreate.data.id}`)
+})
+
 test('Should update a bank (PUT /bank)', async () => {
   const fakeCode1 = `${Math.random()}`.substring(2, 5)
   const fakeName1 = `Test ${Math.random()}`
@@ -319,6 +391,107 @@ test('Should not update a bank that does not exist (PUT /bank)', async () => {
 
   expect(responseUpdate.status).toBe(404)
   expect(responseUpdate.data.message).toBe('Bank not found')
+})
+
+test('Should not update a bank with an existing name (PUT /bank)', async () => {
+  const fakeCode1 = `${Math.random()}`.substring(2, 5)
+  const fakeName1 = `Test ${Math.random()}`
+
+  const firstBankInput = {
+    code: fakeCode1,
+    name: fakeName1,
+    url: 'test4.com',
+  }
+
+  const responseFirstBank = await axios.post(
+    `${webserver.origin}/bank`,
+    firstBankInput,
+  )
+
+  const firstBankId = responseFirstBank.data.id
+
+  const fakeCode2 = `${Math.random()}`.substring(2, 5)
+  const fakeName2 = `Test ${Math.random()}`
+
+  const secondBankInput = {
+    code: fakeCode2,
+    name: fakeName2,
+    url: 'test4.com',
+  }
+
+  const responseSecondBank = await axios.post(
+    `${webserver.origin}/bank`,
+    secondBankInput,
+  )
+
+  const secondBankId = responseSecondBank.data.id
+
+  const responseUpdate = await axios.put(
+    `${webserver.origin}/bank/${firstBankId}`,
+    {
+      code: fakeCode1,
+      name: fakeName2,
+      url: 'test4.changed.com',
+    },
+  )
+
+  expect(responseUpdate.status).toBe(422)
+  expect(responseUpdate.data.message).toBe('Bank name already exists')
+
+  await axios.delete(`${webserver.origin}/bank/${firstBankId}`)
+  await axios.delete(`${webserver.origin}/bank/${secondBankId}`)
+})
+
+test('Should not update a bank with an existing code (PUT /bank)', async () => {
+  const fakeCode1 = `${Math.random()}`.substring(2, 5)
+  const fakeName1 = `Test ${Math.random()}`
+
+  const firstBankInput = {
+    code: fakeCode1,
+    name: fakeName1,
+    url: 'test4.com',
+  }
+
+  const responseFirstBank = await axios.post(
+    `${webserver.origin}/bank`,
+    firstBankInput,
+  )
+
+  const firstBankId = responseFirstBank.data.id
+
+  const fakeName2 = `Test ${Math.random()}`
+
+  const secondBankInput = {
+    code: fakeCode1,
+    name: fakeName2,
+    url: 'test4.com',
+  }
+
+  // Aqui não podemos criar o segundo banco com o mesmo code,
+  // então usamos outro code para criá-lo.
+  const fakeCode2 = `${Math.random()}`.substring(2, 5)
+
+  const responseSecondBank = await axios.post(`${webserver.origin}/bank`, {
+    ...secondBankInput,
+    code: fakeCode2,
+  })
+
+  const secondBankId = responseSecondBank.data.id
+
+  const responseUpdate = await axios.put(
+    `${webserver.origin}/bank/${firstBankId}`,
+    {
+      code: fakeCode2,
+      name: fakeName2,
+      url: 'test4.changed.com',
+    },
+  )
+
+  expect(responseUpdate.status).toBe(422)
+  expect(responseUpdate.data.message).toBe('Bank code already exists')
+
+  await axios.delete(`${webserver.origin}/bank/${firstBankId}`)
+  await axios.delete(`${webserver.origin}/bank/${secondBankId}`)
 })
 
 test('Should delete a bank (DELETE /bank)', async () => {
