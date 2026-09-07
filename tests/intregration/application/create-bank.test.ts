@@ -1,45 +1,44 @@
-import { BankDAO } from '@bank-dao.ts'
+import { BankRepository } from '@bank-repository.ts'
 import { CreateBank } from '@create-bank.ts'
 
-import { BankDAOFake } from '../../mocks/bank-dao-fake.ts'
+import { BankRepositoryFake } from '../../mocks/bank-repository-fake.ts'
 
-let bankDAO: BankDAO
+let bankRepository: BankRepository
 let sut: CreateBank
 
 beforeEach(() => {
-  bankDAO = new BankDAOFake()
-  sut = new CreateBank(bankDAO)
+  bankRepository = new BankRepositoryFake()
+  sut = new CreateBank(bankRepository)
 })
 
-test('Should create bank ', async () => {
-  const fakeCode = `${Math.random()}`.substring(2, 5)
-  const bankInput = {
-    code: fakeCode,
+test('Should create a bank', async () => {
+  const input = {
+    code: `${Math.random()}`.substring(2, 5),
     name: 'Test Name 1',
     url: 'test1.com',
   }
 
-  const { id: bankId, ...restSavedBank } = await sut.execute(bankInput)
+  const createdBank = await sut.execute(input)
+  const savedBank = await bankRepository.findById(createdBank.id)
 
-  const savedBank = await bankDAO.getById(bankId)
-
-  expect(savedBank).toEqual({
-    bank_id: bankId,
-    ...restSavedBank,
-  })
+  expect(savedBank).toBeDefined()
+  expect(savedBank).toBeInstanceOf(Object)
+  expect(savedBank?.getBankId()).toBe(createdBank.id)
+  expect(savedBank?.getName()).toBe(createdBank.name)
+  expect(savedBank?.getCode()).toBe(createdBank.code)
+  expect(savedBank?.getUrl()).toBe(createdBank.url)
 })
 
 test.each(['', undefined, null, 'Test'])(
   'Should not create a bank with an invalid name %s',
   async (rawName: unknown) => {
-    const fakeCode = `${Math.random()}`.substring(2, 5)
-    const inputCreate = {
-      code: fakeCode,
+    const input = {
+      code: `${Math.random()}`.substring(2, 5),
       name: rawName as string,
       url: 'test4.com',
     }
 
-    await expect(sut.execute(inputCreate)).rejects.toThrow('Invalid name')
+    await expect(sut.execute(input)).rejects.toThrow('Invalid name')
   },
 )
 
@@ -57,20 +56,19 @@ test.each([
 ])(
   'Should not create a bank with an invalid code %s',
   async (invalidCode: unknown) => {
-    const inputCreate = {
+    const input = {
       code: invalidCode as string,
-      name: 'test 24',
+      name: 'Test 24',
       url: 'test4.com',
     }
 
-    await expect(sut.execute(inputCreate)).rejects.toThrow('Invalid code')
+    await expect(sut.execute(input)).rejects.toThrow('Invalid code')
   },
 )
 
 test('Should not create two banks with the same code', async () => {
-  const fakeCode = `${Math.random()}`.substring(2, 5)
   const input = {
-    code: fakeCode,
+    code: `${Math.random()}`.substring(2, 5),
     name: 'Banco Teste',
     url: 'teste.com',
   }
@@ -86,21 +84,19 @@ test('Should not create two banks with the same code', async () => {
 })
 
 test('Should not create two banks with the same name', async () => {
-  const fakeCode1 = `${Math.random()}`.substring(2, 5)
-  const fakeCode2 = `${Math.random()}`.substring(2, 5)
-  const fakeName = `Name ${Math.random()}`
-  const input = {
-    code: fakeCode1,
-    name: fakeName,
-    url: 'teste.com',
-  }
+  const name = `Name ${Math.random()}`
 
-  await sut.execute(input)
+  await sut.execute({
+    code: `${Math.random()}`.substring(2, 5),
+    name,
+    url: 'teste.com',
+  })
 
   await expect(
     sut.execute({
-      ...input,
-      code: fakeCode2,
+      code: `${Math.random()}`.substring(2, 5),
+      name,
+      url: 'teste.com',
     }),
   ).rejects.toThrow('Bank name already exists')
 })
