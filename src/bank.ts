@@ -1,10 +1,21 @@
+import { validateBankCode } from '@validate-bank-code.ts'
+import { validateBankName } from '@validate-bank-name.ts'
+
 export class Bank {
   private constructor(
     private bankId: number,
     private name: string,
     private code: string,
     private url: string,
-  ) {}
+  ) {
+    if (!validateBankName(name)) {
+      throw new Error('Invalid name')
+    }
+
+    if (!validateBankCode(code)) {
+      throw new Error('Invalid code')
+    }
+  }
 
   static create({ name, code, url }: Bank.CreateParams): Bank {
     return new Bank(0, name, code, url)

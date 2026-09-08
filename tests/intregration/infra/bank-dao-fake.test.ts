@@ -12,14 +12,14 @@ test('Should create, retrieve, update, list, and remove a bank', async () => {
   const fakeCode1 = `${Math.random()}`.substring(2, 5)
   const TEST_DATA_ORIGINAL = {
     code: fakeCode1,
-    name: 'Test',
+    name: 'Test 1',
     url: 'test.com.br',
   }
 
   const fakeCode2 = `${Math.random()}`.substring(2, 5)
   const TEST_DATA_UPDATED = {
     code: fakeCode2,
-    name: 'Test1',
+    name: 'Test 2',
     url: 'test1.com.br',
   }
 

@@ -1,38 +1,114 @@
 import { Bank } from '@bank.ts'
 
-test('should create a bank', () => {
-  const bankInput = {
-    name: 'Any Name',
-    code: '123',
-    url: 'https://anyurl.com',
-  }
-
-  const instance = Bank.create(bankInput)
-
-  expect(instance).toBeTruthy()
-  expect(instance).toBeInstanceOf(Bank)
-
-  expect(instance.getBankId()).toBeDefined()
-  expect(instance.getName()).toBe(bankInput.name)
-  expect(instance.getCode()).toBe(bankInput.code)
-  expect(instance.getUrl()).toBe(bankInput.url)
+const makeInput = (overrides = {}) => ({
+  name: 'Banco Inter',
+  code: '237',
+  url: 'https://anyurl.com',
+  ...overrides,
 })
 
-test('should restore a bank', () => {
+test('Should create a bank', () => {
+  const input = makeInput()
+
+  const bank = Bank.create(input)
+
+  expect(bank).toBeInstanceOf(Bank)
+  expect(bank.getBankId()).toBeDefined()
+  expect(bank.getName()).toBe(input.name)
+  expect(bank.getCode()).toBe(input.code)
+  expect(bank.getUrl()).toBe(input.url)
+})
+
+test('Should restore a bank', () => {
   const bankDTO = {
     id: 1,
-    name: 'Any Name',
-    code: '123',
+    name: 'Banco Inter',
+    code: '237',
     url: 'https://anyurl.com',
   }
 
-  const instance = Bank.restore(bankDTO)
+  const bank = Bank.restore(bankDTO)
 
-  expect(instance).toBeTruthy()
-  expect(instance).toBeInstanceOf(Bank)
+  expect(bank).toBeInstanceOf(Bank)
+  expect(bank.getBankId()).toBe(bankDTO.id)
+  expect(bank.getName()).toBe(bankDTO.name)
+  expect(bank.getCode()).toBe(bankDTO.code)
+  expect(bank.getUrl()).toBe(bankDTO.url)
+})
 
-  expect(instance.getBankId()).toBe(bankDTO.id)
-  expect(instance.getName()).toBe(bankDTO.name)
-  expect(instance.getCode()).toBe(bankDTO.code)
-  expect(instance.getUrl()).toBe(bankDTO.url)
+test.each(['', undefined, null, 'Banco', 'Nubank', '123', '   '])(
+  'Should not create a bank with an invalid name: %s',
+  (invalidName: unknown) => {
+    expect(() =>
+      Bank.create(
+        makeInput({
+          name: invalidName as string,
+        }),
+      ),
+    ).toThrow('Invalid name')
+  },
+)
+
+test.each([
+  '',
+  undefined,
+  null,
+  '1',
+  '01',
+  '1111',
+  'ABC',
+  'A12',
+  '!@1',
+  '12 ',
+  '1234',
+])(
+  'Should not create a bank with an invalid code: %s',
+  (invalidCode: unknown) => {
+    expect(() =>
+      Bank.create(
+        makeInput({
+          code: invalidCode as string,
+        }),
+      ),
+    ).toThrow('Invalid code')
+  },
+)
+
+test.each([
+  'Banco Inter',
+  'Banco do Brasil',
+  'Caixa Econômica',
+  'XP Investimentos',
+])('Should create a bank with a valid name: %s', (validName) => {
+  expect(() =>
+    Bank.create(
+      makeInput({
+        name: validName,
+      }),
+    ),
+  ).not.toThrow()
+})
+
+test.each(['000', '001', '033', '104', '237', '341', '999'])(
+  'Should create a bank with a valid code: %s',
+  (validCode) => {
+    expect(() =>
+      Bank.create(
+        makeInput({
+          code: validCode,
+        }),
+      ),
+    ).not.toThrow()
+  },
+)
+
+test('Should preserve the bank id after restore', () => {
+  const bank = Bank.restore({
+    id: 42,
+    name: 'Banco Teste',
+    code: '104',
+    url: 'https://bank.com',
+  })
+
+  expect(bank.getBankId()).toBe(42)
 })

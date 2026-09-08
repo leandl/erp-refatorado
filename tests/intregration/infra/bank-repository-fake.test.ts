@@ -12,13 +12,13 @@ beforeEach(() => {
 test('Should create, retrieve, update, list, and remove a bank', async () => {
   const originalData = {
     code: `${Math.random()}`.substring(2, 5),
-    name: 'Test',
+    name: 'Test 1',
     url: 'test.com.br',
   }
 
   const updatedData = {
     code: `${Math.random()}`.substring(2, 5),
-    name: 'Test1',
+    name: 'Test 1',
     url: 'test1.com.br',
   }
 

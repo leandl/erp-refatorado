@@ -9,13 +9,11 @@ export class CreateBank implements UseCase<
   constructor(private repository: BankRepository) {}
 
   async execute(input: CreateBank.Input): Promise<CreateBank.Output> {
-    if (!input.name || !input.name.match(/^.+\s.+$/)) {
-      throw new Error('Invalid name')
-    }
-
-    if (!input.code || input.code.length !== 3 || !input.code.match(/\d{3}/)) {
-      throw new Error('Invalid code')
-    }
+    const bank = Bank.create({
+      name: input.name,
+      code: input.code,
+      url: input.url,
+    })
 
     const alreadyExistsWithCode = await this.repository.findByCode(input.code)
     if (alreadyExistsWithCode) {
@@ -27,11 +25,6 @@ export class CreateBank implements UseCase<
       throw new Error('Bank name already exists')
     }
 
-    const bank = Bank.create({
-      name: input.name,
-      code: input.code,
-      url: input.url,
-    })
     const bankSeved = await this.repository.save(bank)
 
     return {

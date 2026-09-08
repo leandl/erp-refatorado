@@ -190,7 +190,7 @@ test('Should not update a bank with another bank name', async () => {
 test('Should allow keeping the same code', async () => {
   const bank = await makeBank({
     code: '001',
-    name: 'Bank',
+    name: 'Bank 1',
   })
 
   await expect(
@@ -206,7 +206,7 @@ test('Should allow keeping the same code', async () => {
 test('Should allow keeping the same name', async () => {
   const bank = await makeBank({
     code: '001',
-    name: 'Bank',
+    name: 'Bank 1',
   })
 
   await expect(
