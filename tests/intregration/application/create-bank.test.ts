@@ -11,34 +11,61 @@ beforeEach(() => {
   sut = new CreateBank(bankRepository)
 })
 
+const makeInput = (overrides = {}) => ({
+  code: `${Math.floor(Math.random() * 900 + 100)}`,
+  name: 'Test Bank',
+  url: 'https://test.com',
+  ...overrides,
+})
+
 test('Should create a bank', async () => {
-  const input = {
-    code: `${Math.random()}`.substring(2, 5),
-    name: 'Test Name 1',
-    url: 'test1.com',
-  }
+  const input = makeInput({
+    code: '001',
+    name: 'Banco Teste',
+    url: 'https://bank.com',
+  })
 
   const createdBank = await sut.execute(input)
   const savedBank = await bankRepository.findById(createdBank.id)
 
+  expect(createdBank).toEqual({
+    id: expect.any(Number),
+    ...input,
+  })
+
   expect(savedBank).toBeDefined()
-  expect(savedBank).toBeInstanceOf(Object)
   expect(savedBank?.getBankId()).toBe(createdBank.id)
-  expect(savedBank?.getName()).toBe(createdBank.name)
-  expect(savedBank?.getCode()).toBe(createdBank.code)
-  expect(savedBank?.getUrl()).toBe(createdBank.url)
+  expect(savedBank?.getCode()).toBe(input.code)
+  expect(savedBank?.getName()).toBe(input.name)
+  expect(savedBank?.getUrl()).toBe(input.url)
+})
+
+test('Should generate different ids for different banks', async () => {
+  const first = await sut.execute(makeInput({ code: '001', name: 'Bank 1' }))
+  const second = await sut.execute(makeInput({ code: '002', name: 'Bank 2' }))
+
+  expect(first.id).not.toBe(second.id)
+})
+
+test('Should create multiple banks with different names and codes', async () => {
+  const first = await sut.execute(makeInput({ code: '001', name: 'Bank 1' }))
+  const second = await sut.execute(makeInput({ code: '237', name: 'Bank 2' }))
+
+  const firstSaved = await bankRepository.findById(first.id)
+  const secondSaved = await bankRepository.findById(second.id)
+
+  expect(firstSaved).toBeDefined()
+  expect(secondSaved).toBeDefined()
+  expect(firstSaved?.getCode()).toBe('001')
+  expect(secondSaved?.getCode()).toBe('237')
 })
 
 test.each(['', undefined, null, 'Test'])(
-  'Should not create a bank with an invalid name %s',
-  async (rawName: unknown) => {
-    const input = {
-      code: `${Math.random()}`.substring(2, 5),
-      name: rawName as string,
-      url: 'test4.com',
-    }
-
-    await expect(sut.execute(input)).rejects.toThrow('Invalid name')
+  'Should not create a bank with an invalid name: %s',
+  async (invalidName: unknown) => {
+    await expect(
+      sut.execute(makeInput({ name: invalidName as string })),
+    ).rejects.toThrow('Invalid name')
   },
 )
 
@@ -54,24 +81,19 @@ test.each([
   'A12',
   '!@1',
 ])(
-  'Should not create a bank with an invalid code %s',
+  'Should not create a bank with an invalid code: %s',
   async (invalidCode: unknown) => {
-    const input = {
-      code: invalidCode as string,
-      name: 'Test 24',
-      url: 'test4.com',
-    }
-
-    await expect(sut.execute(input)).rejects.toThrow('Invalid code')
+    await expect(
+      sut.execute(makeInput({ code: invalidCode as string })),
+    ).rejects.toThrow('Invalid code')
   },
 )
 
 test('Should not create two banks with the same code', async () => {
-  const input = {
-    code: `${Math.random()}`.substring(2, 5),
+  const input = makeInput({
+    code: '033',
     name: 'Banco Teste',
-    url: 'teste.com',
-  }
+  })
 
   await sut.execute(input)
 
@@ -84,19 +106,45 @@ test('Should not create two banks with the same code', async () => {
 })
 
 test('Should not create two banks with the same name', async () => {
-  const name = `Name ${Math.random()}`
+  const name = 'Banco Único'
 
-  await sut.execute({
-    code: `${Math.random()}`.substring(2, 5),
-    name,
-    url: 'teste.com',
-  })
+  await sut.execute(
+    makeInput({
+      code: '001',
+      name,
+    }),
+  )
 
   await expect(
-    sut.execute({
-      code: `${Math.random()}`.substring(2, 5),
-      name,
-      url: 'teste.com',
-    }),
+    sut.execute(
+      makeInput({
+        code: '237',
+        name,
+      }),
+    ),
   ).rejects.toThrow('Bank name already exists')
+})
+
+test('Should allow same url for different banks', async () => {
+  const url = 'https://shared.com'
+
+  await expect(
+    sut.execute(
+      makeInput({
+        code: '001',
+        name: 'Bank 1',
+        url,
+      }),
+    ),
+  ).resolves.toBeDefined()
+
+  await expect(
+    sut.execute(
+      makeInput({
+        code: '237',
+        name: 'Bank 2',
+        url,
+      }),
+    ),
+  ).resolves.toBeDefined()
 })
