@@ -1,11 +1,12 @@
-import { BankDAO } from '@bank-dao.ts'
+import { Bank } from '@bank.ts'
+import { BankRepository } from '@bank-repository.ts'
 import { UseCase } from '@use-case.ts'
 
 export class UpdateBank implements UseCase<
   UpdateBank.Input,
   UpdateBank.Output
 > {
-  constructor(private bankDAO: BankDAO) {}
+  constructor(private bankRepository: BankRepository) {}
 
   async execute(input: UpdateBank.Input): Promise<UpdateBank.Output> {
     if (!input.name || !input.name.match(/^.+\s.+$/)) {
@@ -16,39 +17,48 @@ export class UpdateBank implements UseCase<
       throw new Error('Invalid code')
     }
 
-    const bank = await this.bankDAO.getById(input.id)
+    const bank = await this.bankRepository.findById(input.id)
     if (!bank) {
       throw new Error('Bank not found')
     }
 
-    if (bank.code !== input.code) {
-      const alreadyExistsWithCode = await this.bankDAO.getByCode(input.code)
+    if (bank.getCode() !== input.code) {
+      const alreadyExistsWithCode = await this.bankRepository.findByCode(
+        input.code,
+      )
       if (alreadyExistsWithCode) {
         throw new Error('Bank code already exists')
       }
     }
 
-    if (bank.name !== input.name) {
-      const alreadyExistsWithName = await this.bankDAO.getByName(input.name)
+    if (bank.getName() !== input.name) {
+      const alreadyExistsWithName = await this.bankRepository.findByName(
+        input.name,
+      )
       if (alreadyExistsWithName) {
         throw new Error('Bank name already exists')
       }
     }
 
-    const code = input.code ?? bank!.code
-    const name = input.name ?? bank!.name
-    const url = input.url ?? bank!.url
+    const code = input.code ?? bank!.getCode()
+    const name = input.name ?? bank!.getName()
+    const url = input.url ?? bank!.getUrl()
 
-    const bankUpdated = {
+    const bankUpdated = Bank.restore({
       id: Number(input.id),
       code,
       name,
       url,
+    })
+
+    await this.bankRepository.update(bankUpdated)
+
+    return {
+      id: bankUpdated.getBankId(),
+      code: bankUpdated.getCode(),
+      name: bankUpdated.getName(),
+      url: bankUpdated.getUrl(),
     }
-
-    await this.bankDAO.update(bankUpdated)
-
-    return bankUpdated
   }
 }
 

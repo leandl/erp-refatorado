@@ -1,4 +1,3 @@
-import { BankDAODatabase } from '@bank-dao.ts'
 import { BankRepositoryDatabase } from '@bank-repository.ts'
 import { CreateBank } from '@create-bank.ts'
 import { DatabaseStatusDAODatabase } from '@database-status-dao.ts'
@@ -14,7 +13,6 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-const bankDAO = new BankDAODatabase()
 const bankRepository = new BankRepositoryDatabase()
 
 app.get('/status', async (request: Request, response: Response) => {
@@ -31,7 +29,7 @@ app.get('/status', async (request: Request, response: Response) => {
 })
 
 app.get('/bank', async (request: Request, response: Response) => {
-  const usecase = new GetBankList(bankDAO)
+  const usecase = new GetBankList(bankRepository)
   const output = await usecase.execute()
   response.status(200).json(output)
 })
@@ -73,7 +71,7 @@ app.put('/bank/:bank_id', async (request: Request, response: Response) => {
     ...bankData,
   }
 
-  const usecase = new UpdateBank(bankDAO)
+  const usecase = new UpdateBank(bankRepository)
 
   try {
     const output = await usecase.execute(input)
@@ -94,7 +92,7 @@ app.put('/bank/:bank_id', async (request: Request, response: Response) => {
 app.delete('/bank/:bank_id', async (request: Request, response: Response) => {
   const bankId = request.params.bank_id
 
-  const usecase = new RemoveBank(bankDAO)
+  const usecase = new RemoveBank(bankRepository)
   try {
     await usecase.execute({ id: Number(bankId) })
 

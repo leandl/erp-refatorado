@@ -1,49 +1,151 @@
-import { BankDAO } from '@bank-dao.ts'
+import { Bank } from '@bank.ts'
+import { BankRepository } from '@bank-repository.ts'
 import { GetBankList } from '@get-bank-list.ts'
-import Sinon from 'sinon'
 
-import { BankDAOFake } from '../../mocks/bank-dao-fake.ts'
+import { BankRepositoryFake } from '../../mocks/bank-repository-fake.ts'
 
-let bankDAO: BankDAO
+let bankRepository: BankRepository
 let sut: GetBankList
 
-beforeAll(() => {
-  bankDAO = new BankDAOFake()
-  sut = new GetBankList(bankDAO)
+beforeEach(() => {
+  bankRepository = new BankRepositoryFake()
+  sut = new GetBankList(bankRepository)
 })
 
-afterEach(() => {
-  Sinon.restore()
+const makeBank = async (overrides = {}) => {
+  const bank = Bank.create({
+    code: `${Math.floor(Math.random() * 900 + 100)}`,
+    name: 'Test Bank',
+    url: 'https://test.com',
+    ...overrides,
+  })
+
+  return bankRepository.save(bank)
+}
+
+test('Should return an empty bank list when no banks exist', async () => {
+  const banks = await sut.execute()
+
+  expect(banks).toEqual([])
 })
 
-test('Should get bank list', async () => {
-  const fakeCode1 = `${Math.random()}`.substring(2, 5)
-  const bankInput1 = {
-    code: fakeCode1,
-    name: 'Test Name 1',
-    url: 'test1.com',
-  }
-
-  const bankId1 = await bankDAO.save(bankInput1)
-
-  const fakeCode2 = `${Math.random()}`.substring(2, 5)
-  const bankInput2 = {
-    code: fakeCode2,
-    name: 'Test Name 2',
-    url: 'test2.com',
-  }
-
-  const bankId2 = await bankDAO.save(bankInput2)
+test('Should return a list with one bank', async () => {
+  const savedBank = await makeBank({
+    code: '001',
+    name: 'Bank 1',
+    url: 'https://bank1.com',
+  })
 
   const banks = await sut.execute()
-  expect(banks.length).toBe(2)
-  expect(banks[0]).toEqual({
-    id: bankId1,
-    ...bankInput1,
+
+  expect(banks).toEqual([
+    {
+      id: savedBank.getBankId(),
+      code: '001',
+      name: 'Bank 1',
+      url: 'https://bank1.com',
+    },
+  ])
+})
+
+test('Should return all banks', async () => {
+  const firstBank = await makeBank({
+    code: '001',
+    name: 'Bank 1',
+    url: 'https://bank1.com',
   })
 
-  expect(banks[1]).toEqual({
-    id: bankId2,
-    ...bankInput2,
+  const secondBank = await makeBank({
+    code: '237',
+    name: 'Bank 2',
+    url: 'https://bank2.com',
   })
+
+  const banks = await sut.execute()
+
+  expect(banks).toHaveLength(2)
+  expect(banks).toEqual([
+    {
+      id: firstBank.getBankId(),
+      code: '001',
+      name: 'Bank 1',
+      url: 'https://bank1.com',
+    },
+    {
+      id: secondBank.getBankId(),
+      code: '237',
+      name: 'Bank 2',
+      url: 'https://bank2.com',
+    },
+  ])
+})
+
+test('Should preserve insertion order', async () => {
+  const firstBank = await makeBank({
+    code: '001',
+    name: 'First Bank',
+  })
+
+  const secondBank = await makeBank({
+    code: '033',
+    name: 'Second Bank',
+  })
+
+  const thirdBank = await makeBank({
+    code: '341',
+    name: 'Third Bank',
+  })
+
+  const banks = await sut.execute()
+
+  expect(banks.map((bank) => bank.id)).toEqual([
+    firstBank.getBankId(),
+    secondBank.getBankId(),
+    thirdBank.getBankId(),
+  ])
+})
+
+test('Should not return removed banks', async () => {
+  const firstBank = await makeBank({
+    code: '001',
+    name: 'Bank 1',
+  })
+
+  const secondBank = await makeBank({
+    code: '237',
+    name: 'Bank 2',
+  })
+
+  await bankRepository.remove(firstBank.getBankId())
+
+  const banks = await sut.execute()
+
+  expect(banks).toHaveLength(1)
+  expect(banks).toEqual([
+    {
+      id: secondBank.getBankId(),
+      code: '237',
+      name: 'Bank 2',
+      url: 'https://test.com',
+    },
+  ])
+})
+
+test('Should return immutable bank data', async () => {
+  const savedBank = await makeBank({
+    code: '104',
+    name: 'Caixa Test',
+    url: 'https://caixa.test',
+  })
+
+  const [bank] = await sut.execute()
+
+  expect(bank).toEqual({
+    id: savedBank.getBankId(),
+    code: '104',
+    name: 'Caixa Test',
+    url: 'https://caixa.test',
+  })
+
+  expect(bank).not.toBe(savedBank)
 })

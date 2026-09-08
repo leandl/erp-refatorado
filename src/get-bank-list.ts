@@ -1,20 +1,20 @@
-import { BankDAO } from '@bank-dao.ts'
+import { BankRepository } from '@bank-repository.ts'
 import { UseCase } from '@use-case.ts'
 
 export class GetBankList implements UseCase<
   GetBankList.Input,
   GetBankList.Output
 > {
-  constructor(private bankDAO: BankDAO) {}
+  constructor(private bankRepository: BankRepository) {}
 
   async execute(): Promise<GetBankList.Output> {
-    const banks = await this.bankDAO.list()
+    const banks = await this.bankRepository.list()
 
     return banks.map((bank) => ({
-      id: bank.bank_id,
-      name: bank.name,
-      code: bank.code,
-      url: bank.url,
+      id: bank.getBankId(),
+      name: bank.getName(),
+      code: bank.getCode(),
+      url: bank.getUrl(),
     }))
   }
 }

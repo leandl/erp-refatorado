@@ -1,114 +1,108 @@
-import { BankDAO } from '@bank-dao.ts'
+import { Bank } from '@bank.ts'
+import { BankRepository } from '@bank-repository.ts'
 import { UpdateBank } from '@update-bank.ts'
-import Sinon from 'sinon'
 
-import { BankDAOFake } from '../../mocks/bank-dao-fake.ts'
+import { BankRepositoryFake } from '../../mocks/bank-repository-fake.ts'
 
-let bankDAO: BankDAO
+let bankRepository: BankRepository
 let sut: UpdateBank
 
-beforeAll(() => {
-  bankDAO = new BankDAOFake()
-  sut = new UpdateBank(bankDAO)
+beforeEach(() => {
+  bankRepository = new BankRepositoryFake()
+  sut = new UpdateBank(bankRepository)
 })
 
-afterEach(() => {
-  Sinon.restore()
-})
+const makeBank = async (overrides = {}) => {
+  const bank = Bank.create({
+    code: `${Math.floor(Math.random() * 900 + 100)}`,
+    name: 'Test Bank',
+    url: 'https://test.com',
+    ...overrides,
+  })
+
+  return bankRepository.save(bank)
+}
 
 test('Should update a bank', async () => {
-  const fakeCode1 = `${Math.random()}`.substring(2, 5)
-  const bankInput = {
-    code: fakeCode1,
-    name: 'Test Name',
-    url: 'test4.com',
+  const bank = await makeBank({
+    code: '001',
+    name: 'Original Bank',
+    url: 'https://original.com',
+  })
+
+  const input = {
+    id: bank.getBankId(),
+    code: '237',
+    name: 'Updated Bank',
+    url: 'https://updated.com',
   }
 
-  const bankId = await bankDAO.save(bankInput)
+  const updatedBank = await sut.execute(input)
 
-  const fakeCode2 = `${Math.random()}`.substring(2, 5)
-  const updateInput = {
-    code: fakeCode2,
-    name: 'Test Name Changed',
-    url: 'test4.changed.com',
-  }
+  expect(updatedBank).toEqual(input)
 
-  const updatedBank = await sut.execute({ id: bankId, ...updateInput })
-  expect(updatedBank).toEqual(
-    expect.objectContaining({
-      id: bankId,
-      ...updateInput,
-    }),
-  )
+  const persistedBank = await bankRepository.findById(bank.getBankId())
 
-  const persistedBank = await bankDAO.getById(bankId)
-  expect(persistedBank).toEqual(
-    expect.objectContaining({
-      bank_id: bankId,
-      ...updateInput,
-    }),
-  )
-
-  await bankDAO.remove(bankId)
+  expect(persistedBank?.getBankId()).toBe(bank.getBankId())
+  expect(persistedBank?.getCode()).toBe('237')
+  expect(persistedBank?.getName()).toBe('Updated Bank')
+  expect(persistedBank?.getUrl()).toBe('https://updated.com')
 })
 
 test('Should update a bank with the same values', async () => {
-  const fakeCode = `${Math.random()}`.substring(2, 5)
-
-  const bankInput = {
-    code: fakeCode,
-    name: 'Test Name',
-    url: 'test4.com',
-  }
-
-  const bankId = await bankDAO.save(bankInput)
-
-  const updatedBank = await sut.execute({
-    id: bankId,
-    ...bankInput,
+  const bank = await makeBank({
+    code: '001',
+    name: 'Original Bank',
+    url: 'https://original.com',
   })
 
-  expect(updatedBank).toEqual(
-    expect.objectContaining({
-      id: bankId,
-      ...bankInput,
-    }),
-  )
+  const input = {
+    id: bank.getBankId(),
+    code: '001',
+    name: 'Original Bank',
+    url: 'https://original.com',
+  }
 
-  const persistedBank = await bankDAO.getById(bankId)
+  await expect(sut.execute(input)).resolves.toEqual(input)
+})
 
-  expect(persistedBank).toEqual(
-    expect.objectContaining({
-      bank_id: bankId,
-      ...bankInput,
-    }),
-  )
+test('Should update only the requested bank', async () => {
+  const firstBank = await makeBank({
+    code: '001',
+    name: 'Bank 1',
+  })
 
-  await bankDAO.remove(bankId)
+  const secondBank = await makeBank({
+    code: '237',
+    name: 'Bank 2',
+  })
+
+  await sut.execute({
+    id: firstBank.getBankId(),
+    code: '033',
+    name: 'Updated Bank',
+    url: 'https://updated.com',
+  })
+
+  const unchangedBank = await bankRepository.findById(secondBank.getBankId())
+
+  expect(unchangedBank?.getCode()).toBe('237')
+  expect(unchangedBank?.getName()).toBe('Bank 2')
 })
 
 test.each(['', undefined, null, 'Test'])(
-  'Should not update a bank with an invalid name %s',
-  async (rawName: unknown) => {
-    const fakeCode1 = `${Math.random()}`.substring(2, 5)
-    const bankInput = {
-      code: fakeCode1,
-      name: 'Test Name',
-      url: 'test4.com',
-    }
+  'Should not update a bank with an invalid name: %s',
+  async (invalidName: unknown) => {
+    const bank = await makeBank()
 
-    const bankId = await bankDAO.save(bankInput)
-
-    const fakeCode2 = `${Math.random()}`.substring(2, 5)
-    const inputUpdate = {
-      id: bankId,
-      code: fakeCode2,
-      name: rawName as string,
-      url: 'test4.com',
-    }
-
-    await expect(sut.execute(inputUpdate)).rejects.toThrow('Invalid name')
-    await bankDAO.remove(bankId)
+    await expect(
+      sut.execute({
+        id: bank.getBankId(),
+        code: '237',
+        name: invalidName as string,
+        url: 'https://test.com',
+      }),
+    ).rejects.toThrow('Invalid name')
   },
 )
 
@@ -124,101 +118,159 @@ test.each([
   'A12',
   '!@1',
 ])(
-  'Should not update a bank with an invalid code %s',
+  'Should not update a bank with an invalid code: %s',
   async (invalidCode: unknown) => {
-    const fakeCode = `${Math.random()}`.substring(2, 5)
-    const bankInput = {
-      code: fakeCode,
-      name: 'Test Name',
-      url: 'test4.com',
-    }
+    const bank = await makeBank()
 
-    const bankId = await bankDAO.save(bankInput)
-
-    const inputUpdate = {
-      id: bankId,
-      code: invalidCode as string,
-      name: 'test 555',
-      url: 'test4.com',
-    }
-
-    await expect(sut.execute(inputUpdate)).rejects.toThrow('Invalid code')
-    await bankDAO.remove(bankId)
+    await expect(
+      sut.execute({
+        id: bank.getBankId(),
+        code: invalidCode as string,
+        name: 'Updated Bank',
+        url: 'https://test.com',
+      }),
+    ).rejects.toThrow('Invalid code')
   },
 )
 
 test('Should not update a bank that does not exist', async () => {
-  const fakeCode = `${Math.random()}`.substring(2, 5)
-  const inputUpdate = {
-    id: 9_999_999,
-    code: fakeCode,
-    name: 'Test Name',
-    url: 'test4.com',
-  }
-
-  await expect(sut.execute(inputUpdate)).rejects.toThrow('Bank not found')
+  const NON_EXISTENT_BANK_ID = 999
+  await expect(
+    sut.execute({
+      id: NON_EXISTENT_BANK_ID,
+      code: '001',
+      name: 'Bank 1',
+      url: 'https://test.com',
+    }),
+  ).rejects.toThrow('Bank not found')
 })
 
-test('Should not update banks with the same code', async () => {
-  const fakeCode1 = `${Math.random()}`.substring(2, 5)
-  const fakeName1 = `Name ${Math.random()}`
+test('Should not update a bank with another bank code', async () => {
+  const firstBank = await makeBank({
+    code: '001',
+    name: 'Bank 1',
+  })
 
-  const firstBankInput = {
-    code: fakeCode1,
-    name: fakeName1,
-    url: 'teste.com',
-  }
-
-  const firstBankId = await bankDAO.save(firstBankInput)
-
-  const fakeCode2 = `${Math.random()}`.substring(2, 5)
-  const fakeName2 = `Name ${Math.random()}`
-
-  const secondBankInput = {
-    code: fakeCode2,
-    name: fakeName2,
-    url: 'teste.com',
-  }
-
-  await bankDAO.save(secondBankInput)
+  await makeBank({
+    code: '237',
+    name: 'Bank 2',
+  })
 
   await expect(
     sut.execute({
-      id: firstBankId,
-      ...firstBankInput,
-      code: fakeCode2,
+      id: firstBank.getBankId(),
+      code: '237',
+      name: 'Bank 1',
+      url: 'https://test.com',
     }),
   ).rejects.toThrow('Bank code already exists')
 })
 
-test('Should not update banks with the same name', async () => {
-  const fakeCode1 = `${Math.random()}`.substring(2, 5)
-  const fakeName1 = `Name ${Math.random()}`
+test('Should not update a bank with another bank name', async () => {
+  const firstBank = await makeBank({
+    code: '001',
+    name: 'Bank 1',
+  })
 
-  const firstBankInput = {
-    code: fakeCode1,
-    name: fakeName1,
-    url: 'teste.com',
-  }
-
-  const firstBankId = await bankDAO.save(firstBankInput)
-
-  const fakeCode2 = `${Math.random()}`.substring(2, 5)
-  const fakeName2 = `Name ${Math.random()}`
-
-  const secondBankInput = {
-    code: fakeCode2,
-    name: fakeName2,
-    url: 'teste.com',
-  }
-
-  await bankDAO.save(secondBankInput)
+  await makeBank({
+    code: '237',
+    name: 'Bank 2',
+  })
 
   await expect(
     sut.execute({
-      id: firstBankId,
-      ...firstBankInput,
-      name: fakeName2,
+      id: firstBank.getBankId(),
+      code: '001',
+      name: 'Bank 2',
+      url: 'https://test.com',
     }),
   ).rejects.toThrow('Bank name already exists')
+})
+
+test('Should allow keeping the same code', async () => {
+  const bank = await makeBank({
+    code: '001',
+    name: 'Bank',
+  })
+
+  await expect(
+    sut.execute({
+      id: bank.getBankId(),
+      code: '001',
+      name: 'Updated Name',
+      url: 'https://updated.com',
+    }),
+  ).resolves.toBeDefined()
+})
+
+test('Should allow keeping the same name', async () => {
+  const bank = await makeBank({
+    code: '001',
+    name: 'Bank',
+  })
+
+  await expect(
+    sut.execute({
+      id: bank.getBankId(),
+      code: '237',
+      name: 'Bank 1',
+      url: 'https://updated.com',
+    }),
+  ).resolves.toBeDefined()
+})
+
+test('Should allow reusing an old code after it is changed', async () => {
+  const firstBank = await makeBank({
+    code: '001',
+    name: 'Bank 1',
+  })
+
+  const secondBank = await makeBank({
+    code: '237',
+    name: 'Bank 2',
+  })
+
+  await sut.execute({
+    id: firstBank.getBankId(),
+    code: '033',
+    name: 'Bank 1',
+    url: 'https://test.com',
+  })
+
+  await expect(
+    sut.execute({
+      id: secondBank.getBankId(),
+      code: '001',
+      name: 'Bank 2',
+      url: 'https://test.com',
+    }),
+  ).resolves.toBeDefined()
+})
+
+test('Should allow reusing an old name after it is changed', async () => {
+  const firstBank = await makeBank({
+    code: '001',
+    name: 'Bank 1',
+  })
+
+  const secondBank = await makeBank({
+    code: '237',
+    name: 'Bank 2',
+  })
+
+  await sut.execute({
+    id: firstBank.getBankId(),
+    code: '001',
+    name: 'Renamed Bank',
+    url: 'https://test.com',
+  })
+
+  await expect(
+    sut.execute({
+      id: secondBank.getBankId(),
+      code: '237',
+      name: 'Bank 1',
+      url: 'https://test.com',
+    }),
+  ).resolves.toBeDefined()
 })
