@@ -4,12 +4,11 @@ import { DatabaseTableMemory } from './database-table-memory.ts'
 
 export class BankDAOFake implements BankDAO {
   private databaseTable = new DatabaseTableMemory<BankDAO.BankDTO>({
-    addIDInRecord: (record, tableRecordId) => {
-      return {
-        ...record,
-        bank_id: tableRecordId,
-      }
-    },
+    clone: (record) => ({ ...record }),
+    addIDInRecord: (record, tableRecordId) => ({
+      ...record,
+      bank_id: tableRecordId,
+    }),
     indexes: [
       {
         name: 'CODE',
@@ -21,7 +20,7 @@ export class BankDAOFake implements BankDAO {
         unique: true,
         getValue: (bank) => bank.name,
       },
-    ],
+    ] as const,
   })
 
   async save(dto: BankDAO.SaveDTO): Promise<number> {

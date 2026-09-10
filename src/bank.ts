@@ -45,16 +45,24 @@ export class Bank {
     this.bankId = bankId
   }
 
-  setName(name: string) {
+  setUrl(url: string) {
+    this.url = url
+  }
+
+  changeName(name: string) {
+    if (!validateBankName(name)) {
+      throw new Error('Invalid name')
+    }
+
     this.name = name
   }
 
-  setCode(code: string) {
-    this.code = code
-  }
+  changeCode(code: string) {
+    if (!validateBankCode(code)) {
+      throw new Error('Invalid code')
+    }
 
-  setUrl(url: string) {
-    this.url = url
+    this.code = code
   }
 }
 

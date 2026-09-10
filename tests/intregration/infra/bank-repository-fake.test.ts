@@ -41,8 +41,8 @@ test('Should create, retrieve, update, list, and remove a bank', async () => {
   expect(bank?.getCode()).toBe(originalData.code)
   expect(bank?.getUrl()).toBe(originalData.url)
 
-  bank!.setName(updatedData.name)
-  bank!.setCode(updatedData.code)
+  bank!.changeName(updatedData.name)
+  bank!.changeCode(updatedData.code)
   bank!.setUrl(updatedData.url)
 
   await bankRepository.update(bank!)

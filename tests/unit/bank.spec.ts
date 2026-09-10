@@ -112,3 +112,53 @@ test('Should preserve the bank id after restore', () => {
 
   expect(bank.getBankId()).toBe(42)
 })
+
+test('Should change the bank name', () => {
+  const bank = Bank.create(makeInput())
+
+  bank.changeName('Banco do Brasil')
+
+  expect(bank.getName()).toBe('Banco do Brasil')
+})
+
+test.each(['', undefined, null, 'Banco', 'Nubank', '123', '   '])(
+  'Should not change the bank name to an invalid value: %s',
+  (invalidName: unknown) => {
+    const bank = Bank.create(makeInput())
+
+    expect(() => bank.changeName(invalidName as string)).toThrow('Invalid name')
+
+    expect(bank.getName()).toBe('Banco Inter')
+  },
+)
+
+test('Should change the bank code', () => {
+  const bank = Bank.create(makeInput())
+
+  bank.changeCode('104')
+
+  expect(bank.getCode()).toBe('104')
+})
+
+test.each([
+  '',
+  undefined,
+  null,
+  '1',
+  '01',
+  '1111',
+  'ABC',
+  'A12',
+  '!@1',
+  '12 ',
+  '1234',
+])(
+  'Should not change the bank code to an invalid value: %s',
+  (invalidCode: unknown) => {
+    const bank = Bank.create(makeInput())
+
+    expect(() => bank.changeCode(invalidCode as string)).toThrow('Invalid code')
+
+    expect(bank.getCode()).toBe('237')
+  },
+)

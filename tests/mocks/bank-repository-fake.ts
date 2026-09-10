@@ -5,14 +5,20 @@ import { DatabaseTableMemory } from './database-table-memory.ts'
 
 export class BankRepositoryFake implements BankRepository {
   private databaseTable = new DatabaseTableMemory<Bank>({
-    addIDInRecord: (record, tableRecordId) => {
-      return Bank.restore({
+    clone: (record) =>
+      Bank.restore({
+        id: record.getBankId(),
+        code: record.getCode(),
+        name: record.getName(),
+        url: record.getUrl(),
+      }),
+    addIDInRecord: (record, tableRecordId) =>
+      Bank.restore({
         id: tableRecordId,
         code: record.getCode(),
         name: record.getName(),
         url: record.getUrl(),
-      })
-    },
+      }),
     indexes: [
       {
         name: 'CODE',
@@ -24,7 +30,7 @@ export class BankRepositoryFake implements BankRepository {
         unique: true,
         getValue: (bank) => bank.getName(),
       },
-    ],
+    ] as const,
   })
 
   async save(bank: Bank): Promise<Bank> {
