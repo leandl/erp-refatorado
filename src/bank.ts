@@ -1,3 +1,4 @@
+import { DomainError } from '@domain-error.ts'
 import { validateBankCode } from '@validate-bank-code.ts'
 import { validateBankName } from '@validate-bank-name.ts'
 
@@ -9,11 +10,11 @@ export class Bank {
     private url: string,
   ) {
     if (!validateBankName(name)) {
-      throw new Error('Invalid name')
+      throw new DomainError('Invalid name')
     }
 
     if (!validateBankCode(code)) {
-      throw new Error('Invalid code')
+      throw new DomainError('Invalid code')
     }
   }
 
@@ -51,7 +52,7 @@ export class Bank {
 
   changeName(name: string) {
     if (!validateBankName(name)) {
-      throw new Error('Invalid name')
+      throw new DomainError('Invalid name')
     }
 
     this.name = name
@@ -59,7 +60,7 @@ export class Bank {
 
   changeCode(code: string) {
     if (!validateBankCode(code)) {
-      throw new Error('Invalid code')
+      throw new DomainError('Invalid code')
     }
 
     this.code = code

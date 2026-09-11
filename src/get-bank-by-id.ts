@@ -1,4 +1,5 @@
 import { BankRepository } from '@bank-repository.ts'
+import { NotFoundError } from '@not-found-error.ts'
 import { UseCase } from '@use-case.ts'
 
 export class GetBankById implements UseCase<
@@ -11,7 +12,7 @@ export class GetBankById implements UseCase<
     const bank = await this.bankRepository.findById(input.id)
 
     if (!bank) {
-      return undefined
+      throw new NotFoundError('Bank not found')
     }
 
     return {
@@ -28,12 +29,10 @@ export namespace GetBankById {
     id: number
   }
 
-  export type Output =
-    | {
-        id: number
-        name: string
-        code: string
-        url: string
-      }
-    | undefined
+  export type Output = {
+    id: number
+    name: string
+    code: string
+    url: string
+  }
 }

@@ -1,6 +1,7 @@
 import { Bank } from '@bank.ts'
 import { BankRepository } from '@bank-repository.ts'
 import { GetBankById } from '@get-bank-by-id.ts'
+import { NotFoundError } from '@not-found-error.ts'
 
 import { BankRepositoryFake } from '../../mocks/bank-repository-fake.ts'
 
@@ -40,21 +41,22 @@ test('Should get bank by id', async () => {
   })
 })
 
-test('Should return undefined when bank does not exist', async () => {
+test('Should throw an error when bank does not exist', async () => {
   const NON_EXISTENT_ID = 999
-  const bank = await sut.execute({ id: NON_EXISTENT_ID })
 
-  expect(bank).toBeUndefined()
+  await expect(sut.execute({ id: NON_EXISTENT_ID })).rejects.toThrow(
+    new NotFoundError('Bank not found'),
+  )
 })
 
-test('Should return undefined after bank is removed', async () => {
+test('Should throw an error after bank is removed', async () => {
   const savedBank = await makeBank()
 
   await bankRepository.remove(savedBank.getBankId())
 
-  const bank = await sut.execute({ id: savedBank.getBankId() })
-
-  expect(bank).toBeUndefined()
+  await expect(sut.execute({ id: savedBank.getBankId() })).rejects.toThrow(
+    new NotFoundError('Bank not found'),
+  )
 })
 
 test('Should return the correct bank when multiple banks exist', async () => {

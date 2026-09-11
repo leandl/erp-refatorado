@@ -1,11 +1,15 @@
 import { Bank } from '@bank.ts'
+import { DomainError } from '@domain-error.ts'
 
-const makeInput = (overrides = {}) => ({
-  name: 'Banco Inter',
-  code: '237',
-  url: 'https://anyurl.com',
-  ...overrides,
-})
+const makeInput = <T extends Bank.CreateParams | Bank.RestoreParams>(
+  overrides: Partial<T> = {},
+): T =>
+  ({
+    name: 'Banco Inter',
+    code: '237',
+    url: 'https://anyurl.com',
+    ...overrides,
+  }) as T
 
 test('Should create a bank', () => {
   const input = makeInput()
@@ -41,11 +45,11 @@ test.each(['', undefined, null, 'Banco', 'Nubank', '123', '   '])(
   (invalidName: unknown) => {
     expect(() =>
       Bank.create(
-        makeInput({
+        makeInput<Bank.CreateParams>({
           name: invalidName as string,
         }),
       ),
-    ).toThrow('Invalid name')
+    ).toThrow(new DomainError('Invalid name'))
   },
 )
 
@@ -66,11 +70,11 @@ test.each([
   (invalidCode: unknown) => {
     expect(() =>
       Bank.create(
-        makeInput({
+        makeInput<Bank.CreateParams>({
           code: invalidCode as string,
         }),
       ),
-    ).toThrow('Invalid code')
+    ).toThrow(new DomainError('Invalid code'))
   },
 )
 
@@ -82,7 +86,7 @@ test.each([
 ])('Should create a bank with a valid name: %s', (validName) => {
   expect(() =>
     Bank.create(
-      makeInput({
+      makeInput<Bank.CreateParams>({
         name: validName,
       }),
     ),
@@ -94,7 +98,7 @@ test.each(['000', '001', '033', '104', '237', '341', '999'])(
   (validCode) => {
     expect(() =>
       Bank.create(
-        makeInput({
+        makeInput<Bank.CreateParams>({
           code: validCode,
         }),
       ),
@@ -113,6 +117,76 @@ test('Should preserve the bank id after restore', () => {
   expect(bank.getBankId()).toBe(42)
 })
 
+test.each(['', undefined, null, 'Banco', 'Nubank', '123', '   '])(
+  'Should not restore a bank with an invalid name: %s',
+  (invalidName: unknown) => {
+    expect(() =>
+      Bank.restore(
+        makeInput<Bank.RestoreParams>({
+          id: 1,
+          name: invalidName as string,
+        }),
+      ),
+    ).toThrow(new DomainError('Invalid name'))
+  },
+)
+
+test.each([
+  '',
+  undefined,
+  null,
+  '1',
+  '01',
+  '1111',
+  'ABC',
+  'A12',
+  '!@1',
+  '12 ',
+  '1234',
+])(
+  'Should not restore a bank with an invalid code: %s',
+  (invalidCode: unknown) => {
+    expect(() =>
+      Bank.restore(
+        makeInput<Bank.RestoreParams>({
+          id: 1,
+          code: invalidCode as string,
+        }),
+      ),
+    ).toThrow(new DomainError('Invalid code'))
+  },
+)
+
+test.each([
+  'Banco Inter',
+  'Banco do Brasil',
+  'Caixa Econômica',
+  'XP Investimentos',
+])('Should restore a bank with a valid name: %s', (validName) => {
+  expect(() =>
+    Bank.restore(
+      makeInput<Bank.RestoreParams>({
+        id: 1,
+        name: validName,
+      }),
+    ),
+  ).not.toThrow()
+})
+
+test.each(['000', '001', '033', '104', '237', '341', '999'])(
+  'Should restore a bank with a valid code: %s',
+  (validCode) => {
+    expect(() =>
+      Bank.restore(
+        makeInput<Bank.RestoreParams>({
+          id: 1,
+          code: validCode,
+        }),
+      ),
+    ).not.toThrow()
+  },
+)
+
 test('Should change the bank name', () => {
   const bank = Bank.create(makeInput())
 
@@ -125,10 +199,13 @@ test.each(['', undefined, null, 'Banco', 'Nubank', '123', '   '])(
   'Should not change the bank name to an invalid value: %s',
   (invalidName: unknown) => {
     const bank = Bank.create(makeInput())
+    const oldBankName = bank.getName()
 
-    expect(() => bank.changeName(invalidName as string)).toThrow('Invalid name')
+    expect(() => bank.changeName(invalidName as string)).toThrow(
+      new DomainError('Invalid name'),
+    )
 
-    expect(bank.getName()).toBe('Banco Inter')
+    expect(bank.getName()).toBe(oldBankName)
   },
 )
 
@@ -157,7 +234,9 @@ test.each([
   (invalidCode: unknown) => {
     const bank = Bank.create(makeInput())
 
-    expect(() => bank.changeCode(invalidCode as string)).toThrow('Invalid code')
+    expect(() => bank.changeCode(invalidCode as string)).toThrow(
+      new DomainError('Invalid code'),
+    )
 
     expect(bank.getCode()).toBe('237')
   },

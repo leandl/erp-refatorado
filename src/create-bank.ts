@@ -1,3 +1,4 @@
+import { ApplicationError } from '@application-error.ts'
 import { Bank } from '@bank.ts'
 import { BankRepository } from '@bank-repository.ts'
 import { UseCase } from '@use-case.ts'
@@ -17,12 +18,12 @@ export class CreateBank implements UseCase<
 
     const alreadyExistsWithCode = await this.repository.findByCode(input.code)
     if (alreadyExistsWithCode) {
-      throw new Error('Bank code already exists')
+      throw new ApplicationError('Bank code already exists')
     }
 
     const alreadyExistsWithName = await this.repository.findByName(input.name)
     if (alreadyExistsWithName) {
-      throw new Error('Bank name already exists')
+      throw new ApplicationError('Bank name already exists')
     }
 
     const bankSeved = await this.repository.save(bank)

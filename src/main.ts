@@ -37,14 +37,15 @@ app.get('/bank', async (request: Request, response: Response) => {
 app.get('/bank/:bank_id', async (request: Request, response: Response) => {
   const bankId = request.params.bank_id
 
+  const input = { id: Number(bankId) }
   const usecase = new GetBankById(bankRepository)
-  const output = await usecase.execute({ id: Number(bankId) })
 
-  if (!output) {
+  try {
+    const output = await usecase.execute(input)
+    response.status(200).json(output)
+  } catch (error: any) {
     return response.status(404).end()
   }
-
-  response.status(200).json(output)
 })
 
 app.post('/bank', async (request: Request, response: Response) => {
