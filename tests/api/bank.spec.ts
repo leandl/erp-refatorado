@@ -74,6 +74,13 @@ test('Should return a bank (GET /bank/:ID)', async () => {
 
   await axios.delete(`${webserver.origin}/bank/${bankId}`)
 })
+test('Should not return a bank that does not exist (GET /bank/:ID)', async () => {
+  const response = await axios.get(`${webserver.origin}/bank/999999`)
+
+  expect(response.status).toBe(404)
+  expect(response.data.code).toBe('NOT_FOUND_ERROR')
+  expect(response.data.message).toBe('Bank not found')
+})
 
 test('Should create a bank (POST /bank)', async () => {
   const fakeCode = `${Math.random()}`.substring(2, 5)
@@ -119,16 +126,11 @@ test.each(['', undefined, null, 'Test'])(
       url: 'test4.com',
     }
 
-    const responseCreate = await axios.post(
-      `${webserver.origin}/bank`,
-      inputCreate,
-    )
+    const response = await axios.post(`${webserver.origin}/bank`, inputCreate)
 
-    expect(responseCreate.status).toBe(422)
-
-    const outputCreate = responseCreate.data
-
-    expect(outputCreate.message).toBe('Invalid name')
+    expect(response.status).toBe(422)
+    expect(response.data.code).toBe('DOMAIN_ERROR')
+    expect(response.data.message).toBe('Invalid name')
   },
 )
 
@@ -153,13 +155,11 @@ test.each([
       url: 'test4.com',
     }
 
-    const responseCreate = await axios.post(
-      `${webserver.origin}/bank`,
-      inputCreate,
-    )
+    const response = await axios.post(`${webserver.origin}/bank`, inputCreate)
 
-    expect(responseCreate.status).toBe(422)
-    expect(responseCreate.data.message).toBe('Invalid code')
+    expect(response.status).toBe(422)
+    expect(response.data.code).toBe('DOMAIN_ERROR')
+    expect(response.data.message).toBe('Invalid code')
   },
 )
 
@@ -194,6 +194,7 @@ test('Should not create a bank with an existing code (POST /bank)', async () => 
   )
 
   expect(responseDuplicate.status).toBe(422)
+  expect(responseDuplicate.data.code).toBe('APPLICATION_ERROR')
   expect(responseDuplicate.data.message).toBe('Bank code already exists')
 
   await axios.delete(`${webserver.origin}/bank/${responseCreate.data.id}`)
@@ -230,6 +231,7 @@ test('Should not create a bank with an existing name (POST /bank)', async () => 
   )
 
   expect(responseDuplicate.status).toBe(422)
+  expect(responseDuplicate.data.code).toBe('APPLICATION_ERROR')
   expect(responseDuplicate.data.message).toBe('Bank name already exists')
 
   await axios.delete(`${webserver.origin}/bank/${responseCreate.data.id}`)
@@ -312,16 +314,14 @@ test.each(['', undefined, null, 'Test'])(
       url: 'test4.changed.com',
     }
 
-    const responseUpdate = await axios.put(
+    const response = await axios.put(
       `${webserver.origin}/bank/${bankId}`,
       inputUpdate,
     )
 
-    expect(responseUpdate.status).toBe(422)
-
-    const outputUpdate = responseUpdate.data
-
-    expect(outputUpdate.message).toBe('Invalid name')
+    expect(response.status).toBe(422)
+    expect(response.data.code).toBe('DOMAIN_ERROR')
+    expect(response.data.message).toBe('Invalid name')
 
     await axios.delete(`${webserver.origin}/bank/${outputCreate.id}`)
   },
@@ -363,13 +363,14 @@ test.each([
       url: 'test4.changed.com',
     }
 
-    const responseUpdate = await axios.put(
+    const response = await axios.put(
       `${webserver.origin}/bank/${bankId}`,
       inputUpdate,
     )
 
-    expect(responseUpdate.status).toBe(422)
-    expect(responseUpdate.data.message).toBe('Invalid code')
+    expect(response.status).toBe(422)
+    expect(response.data.code).toBe('DOMAIN_ERROR')
+    expect(response.data.message).toBe('Invalid code')
 
     await axios.delete(`${webserver.origin}/bank/${bankId}`)
   },
@@ -384,13 +385,14 @@ test('Should not update a bank that does not exist (PUT /bank)', async () => {
     url: 'test4.changed.com',
   }
 
-  const responseUpdate = await axios.put(
+  const response = await axios.put(
     `${webserver.origin}/bank/999999`,
     inputUpdate,
   )
 
-  expect(responseUpdate.status).toBe(404)
-  expect(responseUpdate.data.message).toBe('Bank not found')
+  expect(response.status).toBe(404)
+  expect(response.data.code).toBe('NOT_FOUND_ERROR')
+  expect(response.data.message).toBe('Bank not found')
 })
 
 test('Should not update a bank with an existing name (PUT /bank)', async () => {
@@ -436,6 +438,7 @@ test('Should not update a bank with an existing name (PUT /bank)', async () => {
   )
 
   expect(responseUpdate.status).toBe(422)
+  expect(responseUpdate.data.code).toBe('APPLICATION_ERROR')
   expect(responseUpdate.data.message).toBe('Bank name already exists')
 
   await axios.delete(`${webserver.origin}/bank/${firstBankId}`)
@@ -488,6 +491,7 @@ test('Should not update a bank with an existing code (PUT /bank)', async () => {
   )
 
   expect(responseUpdate.status).toBe(422)
+  expect(responseUpdate.data.code).toBe('APPLICATION_ERROR')
   expect(responseUpdate.data.message).toBe('Bank code already exists')
 
   await axios.delete(`${webserver.origin}/bank/${firstBankId}`)

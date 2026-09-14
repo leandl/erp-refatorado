@@ -1,8 +1,11 @@
+import { ApplicationError } from '@application-error.ts'
 import { BankRepositoryDatabase } from '@bank-repository.ts'
 import { CreateBank } from '@create-bank.ts'
 import { DatabaseStatusDAODatabase } from '@database-status-dao.ts'
+import { DomainError } from '@domain-error.ts'
 import { GetBankById } from '@get-bank-by-id.ts'
 import { GetBankList } from '@get-bank-list.ts'
+import { NotFoundError } from '@not-found-error.ts'
 import { RemoveBank } from '@remove-bank.ts'
 import { UpdateBank } from '@update-bank.ts'
 import cors from 'cors'
@@ -30,8 +33,16 @@ app.get('/status', async (request: Request, response: Response) => {
 
 app.get('/bank', async (request: Request, response: Response) => {
   const usecase = new GetBankList(bankRepository)
-  const output = await usecase.execute()
-  response.status(200).json(output)
+
+  try {
+    const output = await usecase.execute()
+    response.status(200).json(output)
+  } catch {
+    return response.status(500).json({
+      code: 'SERVER_ERROR',
+      message: 'Internal server error',
+    })
+  }
 })
 
 app.get('/bank/:bank_id', async (request: Request, response: Response) => {
@@ -43,22 +54,46 @@ app.get('/bank/:bank_id', async (request: Request, response: Response) => {
   try {
     const output = await usecase.execute(input)
     response.status(200).json(output)
-  } catch (error: any) {
-    return response.status(404).end()
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
+      return response.status(404).json({
+        code: error.code,
+        message: error.message,
+      })
+    }
+
+    return response.status(500).json({
+      code: 'SERVER_ERROR',
+      message: 'Internal server error',
+    })
   }
 })
 
 app.post('/bank', async (request: Request, response: Response) => {
-  const input = request.body
+  const bankData = request.body
+
+  const input = {
+    name: bankData.name,
+    code: bankData.code,
+    url: bankData.url,
+  }
 
   const usecase = new CreateBank(bankRepository)
 
   try {
     const output = await usecase.execute(input)
     response.status(201).json(output)
-  } catch (error: any) {
-    return response.status(422).json({
-      message: error.message,
+  } catch (error: unknown) {
+    if (error instanceof DomainError || error instanceof ApplicationError) {
+      return response.status(422).json({
+        code: error.code,
+        message: error.message,
+      })
+    }
+
+    return response.status(500).json({
+      code: 'SERVER_ERROR',
+      message: 'Internal server error',
     })
   }
 })
@@ -69,7 +104,9 @@ app.put('/bank/:bank_id', async (request: Request, response: Response) => {
 
   const input = {
     id: Number(bankId),
-    ...bankData,
+    name: bankData.name,
+    code: bankData.code,
+    url: bankData.url,
   }
 
   const usecase = new UpdateBank(bankRepository)
@@ -77,15 +114,24 @@ app.put('/bank/:bank_id', async (request: Request, response: Response) => {
   try {
     const output = await usecase.execute(input)
     response.status(200).json(output)
-  } catch (error: any) {
-    if (error?.message === 'Bank not found') {
+  } catch (error: unknown) {
+    if (error instanceof NotFoundError) {
       return response.status(404).json({
+        code: error.code,
         message: error.message,
       })
     }
 
-    return response.status(422).json({
-      message: error.message,
+    if (error instanceof DomainError || error instanceof ApplicationError) {
+      return response.status(422).json({
+        code: error.code,
+        message: error.message,
+      })
+    }
+
+    return response.status(500).json({
+      code: 'SERVER_ERROR',
+      message: 'Internal server error',
     })
   }
 })
@@ -93,14 +139,20 @@ app.put('/bank/:bank_id', async (request: Request, response: Response) => {
 app.delete('/bank/:bank_id', async (request: Request, response: Response) => {
   const bankId = request.params.bank_id
 
+  const input = {
+    id: Number(bankId),
+  }
+
   const usecase = new RemoveBank(bankRepository)
+
   try {
-    await usecase.execute({ id: Number(bankId) })
+    await usecase.execute(input)
 
     response.status(200).end()
   } catch (error: any) {
-    return response.status(422).json({
-      message: error.message ?? 'Error removing bank',
+    return response.status(500).json({
+      code: 'SERVER_ERROR',
+      message: 'Internal server error',
     })
   }
 })
