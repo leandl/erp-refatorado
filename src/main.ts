@@ -1,10 +1,10 @@
 import { ApplicationError } from '@application-error.ts'
 import { BankRepositoryDatabase } from '@bank-repository.ts'
 import { CreateBank } from '@create-bank.ts'
-import { DatabaseStatusDAODatabase } from '@database-status-dao.ts'
 import { DomainError } from '@domain-error.ts'
 import { GetBankById } from '@get-bank-by-id.ts'
 import { GetBankList } from '@get-bank-list.ts'
+import { MysqlAdapter } from '@mysql-adapter.ts'
 import { NotFoundError } from '@not-found-error.ts'
 import { RemoveBank } from '@remove-bank.ts'
 import { UpdateBank } from '@update-bank.ts'
@@ -16,17 +16,20 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-const bankRepository = new BankRepositoryDatabase()
+const databaseConnection = new MysqlAdapter(String(process.env.DATABASE_URL))
+const bankRepository = new BankRepositoryDatabase(databaseConnection)
 
 app.get('/status', async (request: Request, response: Response) => {
-  const databaseStatusDAO = new DatabaseStatusDAODatabase()
-
-  const databaseStatus = databaseStatusDAO.getStatus()
+  const databaseStatus = await databaseConnection.getStatus()
 
   return response.status(200).json({
     updated_at: new Date().toISOString(),
     dependencies: {
-      database: databaseStatus,
+      database: {
+        version: databaseStatus.version,
+        max_connections: databaseStatus.maxConnections,
+        opened_connections: databaseStatus.openedConnections,
+      },
     },
   })
 })

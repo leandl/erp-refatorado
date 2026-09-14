@@ -1,5 +1,5 @@
 import { Bank } from '@bank.ts'
-import mysqlConnection from 'mysql2/promise'
+import { DatabaseConnection } from '@database-connection.ts'
 
 export interface BankRepository {
   save(bank: Bank): Promise<Bank>
@@ -12,19 +12,21 @@ export interface BankRepository {
 }
 
 export class BankRepositoryDatabase implements BankRepository {
+  constructor(private databaseConnection: DatabaseConnection) {}
+
   async save(bank: Bank): Promise<Bank> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
-    )
+    const [row] =
+      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+        'INSERT INTO bank(code, name, url) VALUES(:code, :name, :url) RETURNING *',
+        {
+          ':code': bank.getCode(),
+          ':name': bank.getName(),
+          ':url': bank.getUrl(),
+        },
+      )
 
-    const [rows] = (await connection.query(
-      'INSERT INTO bank(code, name, url) VALUES(?, ?, ?)',
-      [bank.getCode(), bank.getName(), bank.getUrl()],
-    )) as any
+    const bankId = row.bank_id
 
-    connection.pool.end()
-
-    const bankId = rows.insertId
     return Bank.restore({
       id: bankId,
       code: bank.getCode(),
@@ -34,96 +36,79 @@ export class BankRepositoryDatabase implements BankRepository {
   }
 
   async findById(bankId: number): Promise<Bank | undefined> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
-    )
+    const [firstRow] =
+      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+        'SELECT * FROM bank WHERE bank_id = :bank_id',
+        { ':bank_id': bankId },
+      )
 
-    const [rows] = await connection.query<any[]>(
-      'SELECT * FROM bank WHERE bank_id = ?',
-      [bankId],
-    )
-    connection.pool.end()
-
-    const [firstRow] = rows
     if (!firstRow) {
       return undefined
     }
 
     return Bank.restore({
-      id: rows[0].bank_id,
-      code: rows[0].code,
-      name: rows[0].name,
-      url: rows[0].url,
+      id: firstRow.bank_id,
+      code: firstRow.code,
+      name: firstRow.name,
+      url: firstRow.url,
     })
   }
 
   async findByCode(code: string): Promise<Bank | undefined> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
-    )
+    const [firstRow] =
+      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+        'SELECT * FROM bank WHERE code = :code',
+        { ':code': code },
+      )
 
-    const [rows] = await connection.query<any[]>(
-      'SELECT * FROM bank WHERE code = ?',
-      [code],
-    )
-    connection.pool.end()
-
-    const [firstRow] = rows
     if (!firstRow) {
       return undefined
     }
 
     return Bank.restore({
-      id: rows[0].bank_id,
-      code: rows[0].code,
-      name: rows[0].name,
-      url: rows[0].url,
+      id: firstRow.bank_id,
+      code: firstRow.code,
+      name: firstRow.name,
+      url: firstRow.url,
     })
   }
 
   async findByName(name: string): Promise<Bank | undefined> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
-    )
+    const [firstRow] =
+      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+        'SELECT * FROM bank WHERE name = :name',
+        { ':name': name },
+      )
 
-    const [rows] = await connection.query<any[]>(
-      'SELECT * FROM bank WHERE name = ?',
-      [name],
-    )
-    connection.pool.end()
-
-    const [firstRow] = rows
     if (!firstRow) {
       return undefined
     }
 
     return Bank.restore({
-      id: rows[0].bank_id,
-      code: rows[0].code,
-      name: rows[0].name,
-      url: rows[0].url,
+      id: firstRow.bank_id,
+      code: firstRow.code,
+      name: firstRow.name,
+      url: firstRow.url,
     })
   }
 
   async update(bank: Bank): Promise<void> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
+    await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+      'UPDATE bank SET code = :code, name = :name, url = :url WHERE bank_id = :bank_id',
+      {
+        ':bank_id': bank.getBankId(),
+        ':code': bank.getCode(),
+        ':name': bank.getName(),
+        ':url': bank.getUrl(),
+      },
     )
-
-    await connection.query(
-      'UPDATE bank SET code = ?, name = ?, url = ? WHERE bank_id = ?',
-      [bank.getCode(), bank.getName(), bank.getUrl(), bank.getBankId()],
-    )
-
-    connection.pool.end()
   }
 
   async list(): Promise<Bank[]> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
-    )
-    const [rows] = await connection.query<any[]>('SELECT * FROM bank')
-    connection.pool.end()
+    const rows =
+      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+        'SELECT * FROM bank',
+      )
 
     return rows.map((row) =>
       Bank.restore({
@@ -136,11 +121,20 @@ export class BankRepositoryDatabase implements BankRepository {
   }
 
   async remove(bankId: number): Promise<void> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
+    await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+      'DELETE FROM bank WHERE bank_id = :bank_id',
+      {
+        ':bank_id': bankId,
+      },
     )
+  }
+}
 
-    await connection.query('DELETE FROM bank WHERE bank_id = ?', [bankId])
-    connection.pool.end()
+namespace BankRepositoryDatabase {
+  export type BankRow = {
+    bank_id: number
+    name: string
+    code: string
+    url: string
   }
 }

@@ -1,9 +1,23 @@
 import { BankDAO, BankDAODatabase } from '@bank-dao.ts'
+import { DatabaseConnection } from '@database-connection.ts'
+import { MysqlAdapter } from '@mysql-adapter.ts'
 
+import { orchestrator } from '../../orchestrator.ts'
+
+let connection: DatabaseConnection
 let bankDAO: BankDAO
 
 beforeAll(async () => {
-  bankDAO = new BankDAODatabase()
+  await orchestrator.waitForAllServices()
+  await orchestrator.clearDatabase()
+  await orchestrator.runPendingMigrations()
+
+  connection = new MysqlAdapter(String(process.env.DATABASE_URL))
+  bankDAO = new BankDAODatabase(connection)
+})
+
+afterAll(async () => {
+  await connection?.close()
 })
 
 test('Should create, retrieve, update, list, and remove a bank', async () => {

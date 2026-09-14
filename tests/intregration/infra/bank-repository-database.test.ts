@@ -1,15 +1,24 @@
 import { Bank } from '@bank.ts'
 import { BankRepository, BankRepositoryDatabase } from '@bank-repository.ts'
+import { DatabaseConnection } from '@database-connection.ts'
+import { MysqlAdapter } from '@mysql-adapter.ts'
 
 import { orchestrator } from '../../orchestrator.ts'
 
 let bankRepository: BankRepository
+let connection: DatabaseConnection
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices()
   await orchestrator.clearDatabase()
   await orchestrator.runPendingMigrations()
-  bankRepository = new BankRepositoryDatabase()
+
+  connection = new MysqlAdapter(String(process.env.DATABASE_URL))
+  bankRepository = new BankRepositoryDatabase(connection)
+})
+
+afterAll(async () => {
+  await connection?.close()
 })
 
 test('Should create, retrieve, update, list, and remove a bank', async () => {

@@ -1,4 +1,4 @@
-import mysqlConnection from 'mysql2/promise'
+import { DatabaseConnection } from '@database-connection.ts'
 
 export interface BankDAO {
   save(dto: BankDAO.SaveDTO): Promise<number>
@@ -33,99 +33,81 @@ export namespace BankDAO {
 }
 
 export class BankDAODatabase implements BankDAO {
+  constructor(private databaseConnection: DatabaseConnection) {}
+
   async save(dto: BankDAO.SaveDTO): Promise<number> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
+    const [row] = await this.databaseConnection.query<BankDAODatabase.BankRow>(
+      'INSERT INTO bank(code, name, url) VALUES(:code, :name, :url) RETURNING *',
+      {
+        ':code': dto.code,
+        ':name': dto.name,
+        ':url': dto.url,
+      },
     )
 
-    const [rows] = (await connection.query(
-      'INSERT INTO bank(code, name, url) VALUES(?, ?, ?)',
-      [dto.code, dto.name, dto.url],
-    )) as any
-
-    connection.pool.end()
-
-    const bankId = rows.insertId
-    return bankId
+    return row.bank_id
   }
 
   async list(): Promise<BankDAO.BankDTO[]> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
+    return await this.databaseConnection.query<BankDAODatabase.BankRow>(
+      'SELECT * FROM bank',
     )
-    const [rows] = await connection.query<any[]>('SELECT * FROM bank')
-    connection.pool.end()
-
-    return rows
   }
 
   async getById(bankId: number): Promise<BankDAO.BankDTO | undefined> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
+    const [row] = await this.databaseConnection.query<BankDAODatabase.BankRow>(
+      'SELECT * FROM bank WHERE bank_id = :bank_id',
+      { ':bank_id': bankId },
     )
 
-    const [rows] = await connection.query<any[]>(
-      'SELECT * FROM bank WHERE bank_id = ?',
-      [bankId],
-    )
-    connection.pool.end()
-
-    if (rows.length > 0) {
-      return rows[0]
-    }
+    return row
   }
 
   async getByCode(code: string): Promise<BankDAO.BankDTO | undefined> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
+    const [row] = await this.databaseConnection.query<BankDAODatabase.BankRow>(
+      'SELECT * FROM bank WHERE code = :code',
+      { ':code': code },
     )
 
-    const [rows] = await connection.query<any[]>(
-      'SELECT * FROM bank WHERE code = ?',
-      [code],
-    )
-    connection.pool.end()
-
-    if (rows.length > 0) {
-      return rows[0]
-    }
+    return row
   }
 
   async getByName(name: string): Promise<BankDAO.BankDTO | undefined> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
+    const [row] = await this.databaseConnection.query<BankDAODatabase.BankRow>(
+      'SELECT * FROM bank WHERE name = :name',
+      { ':name': name },
     )
 
-    const [rows] = await connection.query<any[]>(
-      'SELECT * FROM bank WHERE name = ?',
-      [name],
-    )
-    connection.pool.end()
-
-    if (rows.length > 0) {
-      return rows[0]
-    }
+    return row
   }
 
   async remove(bankId: number): Promise<void> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
+    await this.databaseConnection.query(
+      'DELETE FROM bank WHERE bank_id = :bank_id',
+      {
+        ':bank_id': bankId,
+      },
     )
-
-    await connection.query('DELETE FROM bank WHERE bank_id = ?', [bankId])
-    connection.pool.end()
   }
 
   async update(dto: BankDAO.UpdateDTO): Promise<void> {
-    const connection = mysqlConnection.createPool(
-      process.env.DATABASE_URL || '',
+    await this.databaseConnection.query(
+      'UPDATE bank SET code = :code, name = :name, url = :url WHERE bank_id = :bank_id',
+      {
+        ':bank_id': dto.id,
+        ':code': dto.code,
+        ':name': dto.name,
+        ':url': dto.url,
+      },
     )
+  }
+}
 
-    await connection.query(
-      'UPDATE bank SET code = ?, name = ?, url = ? WHERE bank_id = ?',
-      [dto.code, dto.name, dto.url, dto.id],
-    )
-
-    connection.pool.end()
+namespace BankDAODatabase {
+  export type BankRow = {
+    bank_id: number
+    name: string
+    code: string
+    url: string
   }
 }
