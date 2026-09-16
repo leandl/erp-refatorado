@@ -25,18 +25,18 @@ test('Should register bank routes on the HTTP server', () => {
 
   expect(registerSpy.callCount).toBe(5)
   expect(
-    registerSpy.calledWithExactly('get', '/banco', Sinon.match.func),
+    registerSpy.calledWithExactly('get', '/bank', Sinon.match.func),
   ).toBeTruthy()
   expect(
-    registerSpy.calledWithExactly('get', '/banco/:id', Sinon.match.func),
+    registerSpy.calledWithExactly('get', '/bank/:id', Sinon.match.func),
   ).toBeTruthy()
   expect(
-    registerSpy.calledWithExactly('post', '/banco', Sinon.match.func),
+    registerSpy.calledWithExactly('post', '/bank', Sinon.match.func),
   ).toBeTruthy()
   expect(
-    registerSpy.calledWithExactly('put', '/banco/:id', Sinon.match.func),
+    registerSpy.calledWithExactly('put', '/bank/:id', Sinon.match.func),
   ).toBeTruthy()
   expect(
-    registerSpy.calledWithExactly('delete', '/banco/:id', Sinon.match.func),
+    registerSpy.calledWithExactly('delete', '/bank/:id', Sinon.match.func),
   ).toBeTruthy()
 })

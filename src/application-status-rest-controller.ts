@@ -1,0 +1,22 @@
+import { HttpRestServer } from '@bank-rest-controller.ts'
+import { GetApplicationStatus } from '@get-application-status.ts'
+
+export class ApplicationStatusRestController {
+  constructor(
+    private httpServer: HttpRestServer,
+    private getApplicationStatus: GetApplicationStatus,
+  ) {
+    this.httpServer.register(
+      'get',
+      '/status',
+      async (): Promise<HttpRestServer.Response> => {
+        const output = await this.getApplicationStatus.execute()
+
+        return {
+          statusCode: 200,
+          body: output,
+        }
+      },
+    )
+  }
+}

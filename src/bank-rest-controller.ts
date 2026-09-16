@@ -38,7 +38,7 @@ export class BankRestController {
   ) {
     this.httpServer.register(
       'get',
-      '/banco',
+      '/bank',
       async (): Promise<HttpRestServer.Response> => {
         const output = await this.getBankList.execute()
         return {
@@ -50,7 +50,7 @@ export class BankRestController {
 
     this.httpServer.register(
       'get',
-      '/banco/:id',
+      '/bank/:id',
       async (
         request: HttpRestServer.Request,
       ): Promise<HttpRestServer.Response> => {
@@ -67,7 +67,7 @@ export class BankRestController {
 
     this.httpServer.register(
       'post',
-      '/banco',
+      '/bank',
       async (
         request: HttpRestServer.Request,
       ): Promise<HttpRestServer.Response> => {
@@ -86,7 +86,7 @@ export class BankRestController {
 
     this.httpServer.register(
       'put',
-      '/banco/:id',
+      '/bank/:id',
       async (
         request: HttpRestServer.Request,
       ): Promise<HttpRestServer.Response> => {
@@ -106,7 +106,7 @@ export class BankRestController {
 
     this.httpServer.register(
       'delete',
-      '/banco/:id',
+      '/bank/:id',
       async (
         request: HttpRestServer.Request,
       ): Promise<HttpRestServer.Response> => {
