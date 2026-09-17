@@ -34,6 +34,23 @@ test('Should return the correct data when the GET request responds with 2xx', as
   expect(response.body.test).toBe(expectedBody.test)
 })
 
+test('Should return an empty body when the GET request responds with 2xx', async () => {
+  const origin = 'http://localhost:4321'
+  const path = '/user'
+  const expectedCode = 204
+
+  nock(origin).get(path).reply(expectedCode)
+
+  const getSpy = Sinon.spy(axios, 'get')
+  const response = await sut.get(`${origin}${path}`)
+
+  expect(getSpy.calledOnce).toBeTruthy()
+  expect(getSpy.calledWith(`${origin}${path}`)).toBeTruthy()
+
+  expect(response.statusCode).toBe(expectedCode)
+  expect(response.body).toBeFalsy()
+})
+
 test('Should return the correct data when the GET request responds with 4xx', async () => {
   const origin = 'http://localhost:4321'
   const path = '/user'
