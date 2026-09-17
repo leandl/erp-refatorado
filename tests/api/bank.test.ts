@@ -1,14 +1,16 @@
+import { AxiosAdapter, HttpClient } from '@http-client.ts'
 import { webserver } from '@infra/webserver.ts'
-import axios from 'axios'
 
 import { orchestrator } from '../orchestrator.ts'
 
-axios.defaults.validateStatus = () => true
+let httpClient: HttpClient
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices()
   await orchestrator.clearDatabase()
   await orchestrator.runPendingMigrations()
+
+  httpClient = new AxiosAdapter()
 })
 
 interface Bank {
@@ -24,17 +26,17 @@ test('Should return the list of banks (GET /bank)', async () => {
     url: 'test_list.com',
   }
 
-  const responseCreate = await axios.post(
+  const responseCreate = await httpClient.post(
     `${webserver.origin}/bank`,
     inputCreate,
   )
-  const outputCreate = responseCreate.data
+  const outputCreate = responseCreate.body
   const bankId = outputCreate.id
 
-  const response = await axios.get(`${webserver.origin}/bank`)
-  const output = response.data
+  const response = await httpClient.get(`${webserver.origin}/bank`)
+  const output = response.body
 
-  expect(response.status).toBe(200)
+  expect(response.statusCode).toBe(200)
   expect(output).toBeInstanceOf(Array)
   expect(output.length).toBeGreaterThanOrEqual(1)
 
@@ -56,30 +58,30 @@ test('Should return a bank (GET /bank/:ID)', async () => {
     url: 'test_one.com',
   }
 
-  const responseCreate = await axios.post(
+  const responseCreate = await httpClient.post(
     `${webserver.origin}/bank`,
     inputCreate,
   )
-  const outputCreate = responseCreate.data
+  const outputCreate = responseCreate.body
   const bankId = outputCreate.id
 
-  const response = await axios.get(`${webserver.origin}/bank/${bankId}`)
-  const output = response.data
+  const response = await httpClient.get(`${webserver.origin}/bank/${bankId}`)
+  const output = response.body
 
-  expect(response.status).toBe(200)
+  expect(response.statusCode).toBe(200)
   expect(output.id).toBe(bankId)
   expect(output.code).toBe(inputCreate.code)
   expect(output.name).toBe(inputCreate.name)
   expect(output.url).toBe(inputCreate.url)
 
-  await axios.delete(`${webserver.origin}/bank/${bankId}`)
+  await httpClient.delete(`${webserver.origin}/bank/${bankId}`)
 })
 test('Should not return a bank that does not exist (GET /bank/:ID)', async () => {
-  const response = await axios.get(`${webserver.origin}/bank/999999`)
+  const response = await httpClient.get(`${webserver.origin}/bank/999999`)
 
-  expect(response.status).toBe(404)
-  expect(response.data.code).toBe('NOT_FOUND_ERROR')
-  expect(response.data.message).toBe('Bank not found')
+  expect(response.statusCode).toBe(404)
+  expect(response.body.code).toBe('NOT_FOUND_ERROR')
+  expect(response.body.message).toBe('Bank not found')
 })
 
 test('Should create a bank (POST /bank)', async () => {
@@ -91,29 +93,29 @@ test('Should create a bank (POST /bank)', async () => {
     url: 'test4.com',
   }
 
-  const responseCreate = await axios.post(
+  const responseCreate = await httpClient.post(
     `${webserver.origin}/bank`,
     inputCreate,
   )
-  const outputCreate = responseCreate.data
+  const outputCreate = responseCreate.body
 
-  expect(responseCreate.status).toBe(201)
+  expect(responseCreate.statusCode).toBe(201)
   expect(outputCreate.id).toBeTruthy()
   expect(outputCreate.code).toBe(inputCreate.code)
   expect(outputCreate.name).toBe(inputCreate.name)
   expect(outputCreate.url).toBe(inputCreate.url)
 
-  const responseGet = await axios.get(
+  const responseGet = await httpClient.get(
     `${webserver.origin}/bank/${outputCreate.id}`,
   )
-  const outputGet = responseGet.data
+  const outputGet = responseGet.body
 
   expect(outputGet.id).toBe(outputCreate.id)
   expect(outputGet.code).toBe(inputCreate.code)
   expect(outputGet.name).toBe(inputCreate.name)
   expect(outputGet.url).toBe(inputCreate.url)
 
-  await axios.delete(`${webserver.origin}/bank/${outputCreate.id}`)
+  await httpClient.delete(`${webserver.origin}/bank/${outputCreate.id}`)
 })
 
 test.each(['', undefined, null, 'Test'])(
@@ -126,11 +128,14 @@ test.each(['', undefined, null, 'Test'])(
       url: 'test4.com',
     }
 
-    const response = await axios.post(`${webserver.origin}/bank`, inputCreate)
+    const response = await httpClient.post(
+      `${webserver.origin}/bank`,
+      inputCreate,
+    )
 
-    expect(response.status).toBe(422)
-    expect(response.data.code).toBe('DOMAIN_ERROR')
-    expect(response.data.message).toBe('Invalid name')
+    expect(response.statusCode).toBe(422)
+    expect(response.body.code).toBe('DOMAIN_ERROR')
+    expect(response.body.message).toBe('Invalid name')
   },
 )
 
@@ -155,11 +160,14 @@ test.each([
       url: 'test4.com',
     }
 
-    const response = await axios.post(`${webserver.origin}/bank`, inputCreate)
+    const response = await httpClient.post(
+      `${webserver.origin}/bank`,
+      inputCreate,
+    )
 
-    expect(response.status).toBe(422)
-    expect(response.data.code).toBe('DOMAIN_ERROR')
-    expect(response.data.message).toBe('Invalid code')
+    expect(response.statusCode).toBe(422)
+    expect(response.body.code).toBe('DOMAIN_ERROR')
+    expect(response.body.message).toBe('Invalid code')
   },
 )
 
@@ -173,12 +181,12 @@ test('Should not create a bank with an existing code (POST /bank)', async () => 
     url: 'test4.com',
   }
 
-  const responseCreate = await axios.post(
+  const responseCreate = await httpClient.post(
     `${webserver.origin}/bank`,
     firstBankInput,
   )
 
-  expect(responseCreate.status).toBe(201)
+  expect(responseCreate.statusCode).toBe(201)
 
   const fakeName2 = `Test ${Math.random()}`
 
@@ -188,16 +196,16 @@ test('Should not create a bank with an existing code (POST /bank)', async () => 
     url: 'test4.changed.com',
   }
 
-  const responseDuplicate = await axios.post(
+  const responseDuplicate = await httpClient.post(
     `${webserver.origin}/bank`,
     secondBankInput,
   )
 
-  expect(responseDuplicate.status).toBe(422)
-  expect(responseDuplicate.data.code).toBe('APPLICATION_ERROR')
-  expect(responseDuplicate.data.message).toBe('Bank code already exists')
+  expect(responseDuplicate.statusCode).toBe(422)
+  expect(responseDuplicate.body.code).toBe('APPLICATION_ERROR')
+  expect(responseDuplicate.body.message).toBe('Bank code already exists')
 
-  await axios.delete(`${webserver.origin}/bank/${responseCreate.data.id}`)
+  await httpClient.delete(`${webserver.origin}/bank/${responseCreate.body.id}`)
 })
 
 test('Should not create a bank with an existing name (POST /bank)', async () => {
@@ -210,12 +218,12 @@ test('Should not create a bank with an existing name (POST /bank)', async () => 
     url: 'test4.com',
   }
 
-  const responseCreate = await axios.post(
+  const responseCreate = await httpClient.post(
     `${webserver.origin}/bank`,
     firstBankInput,
   )
 
-  expect(responseCreate.status).toBe(201)
+  expect(responseCreate.statusCode).toBe(201)
 
   const fakeCode2 = `${Math.random()}`.substring(2, 5)
 
@@ -225,16 +233,16 @@ test('Should not create a bank with an existing name (POST /bank)', async () => 
     url: 'test4.changed.com',
   }
 
-  const responseDuplicate = await axios.post(
+  const responseDuplicate = await httpClient.post(
     `${webserver.origin}/bank`,
     secondBankInput,
   )
 
-  expect(responseDuplicate.status).toBe(422)
-  expect(responseDuplicate.data.code).toBe('APPLICATION_ERROR')
-  expect(responseDuplicate.data.message).toBe('Bank name already exists')
+  expect(responseDuplicate.statusCode).toBe(422)
+  expect(responseDuplicate.body.code).toBe('APPLICATION_ERROR')
+  expect(responseDuplicate.body.message).toBe('Bank name already exists')
 
-  await axios.delete(`${webserver.origin}/bank/${responseCreate.data.id}`)
+  await httpClient.delete(`${webserver.origin}/bank/${responseCreate.body.id}`)
 })
 
 test('Should update a bank (PUT /bank)', async () => {
@@ -247,11 +255,11 @@ test('Should update a bank (PUT /bank)', async () => {
     url: 'test4.com',
   }
 
-  const responseCreate = await axios.post(
+  const responseCreate = await httpClient.post(
     `${webserver.origin}/bank`,
     inputCreate,
   )
-  const outputCreate = responseCreate.data
+  const outputCreate = responseCreate.body
   const bankId = outputCreate.id
 
   const fakeCode2 = `${Math.random()}`.substring(2, 5)
@@ -263,30 +271,30 @@ test('Should update a bank (PUT /bank)', async () => {
     url: 'test4.changed.com',
   }
 
-  const responseUpdate = await axios.put(
+  const responseUpdate = await httpClient.put(
     `${webserver.origin}/bank/${bankId}`,
     inputUpdate,
   )
 
-  const outputUpdate = responseUpdate.data
+  const outputUpdate = responseUpdate.body
 
-  expect(responseUpdate.status).toBe(200)
+  expect(responseUpdate.statusCode).toBe(200)
   expect(outputUpdate.id).toBe(bankId)
   expect(outputUpdate.code).toBe(inputUpdate.code)
   expect(outputUpdate.name).toBe(inputUpdate.name)
   expect(outputUpdate.url).toBe(inputUpdate.url)
 
-  const responseGet = await axios.get(
+  const responseGet = await httpClient.get(
     `${webserver.origin}/bank/${outputCreate.id}`,
   )
-  const outputGet = responseGet.data
+  const outputGet = responseGet.body
 
   expect(outputGet.id).toBe(outputCreate.id)
   expect(outputGet.code).toBe(inputUpdate.code)
   expect(outputGet.name).toBe(inputUpdate.name)
   expect(outputGet.url).toBe(inputUpdate.url)
 
-  await axios.delete(`${webserver.origin}/bank/${outputCreate.id}`)
+  await httpClient.delete(`${webserver.origin}/bank/${outputCreate.id}`)
 })
 
 test.each(['', undefined, null, 'Test'])(
@@ -300,11 +308,11 @@ test.each(['', undefined, null, 'Test'])(
       url: 'test4.com',
     }
 
-    const responseCreate = await axios.post(
+    const responseCreate = await httpClient.post(
       `${webserver.origin}/bank`,
       inputCreate,
     )
-    const outputCreate = responseCreate.data
+    const outputCreate = responseCreate.body
     const bankId = outputCreate.id
 
     const fakeCode2 = `${Math.random()}`.substring(2, 5)
@@ -314,16 +322,16 @@ test.each(['', undefined, null, 'Test'])(
       url: 'test4.changed.com',
     }
 
-    const response = await axios.put(
+    const response = await httpClient.put(
       `${webserver.origin}/bank/${bankId}`,
       inputUpdate,
     )
 
-    expect(response.status).toBe(422)
-    expect(response.data.code).toBe('DOMAIN_ERROR')
-    expect(response.data.message).toBe('Invalid name')
+    expect(response.statusCode).toBe(422)
+    expect(response.body.code).toBe('DOMAIN_ERROR')
+    expect(response.body.message).toBe('Invalid name')
 
-    await axios.delete(`${webserver.origin}/bank/${outputCreate.id}`)
+    await httpClient.delete(`${webserver.origin}/bank/${outputCreate.id}`)
   },
 )
 
@@ -349,11 +357,11 @@ test.each([
       url: 'test4.com',
     }
 
-    const responseCreate = await axios.post(
+    const responseCreate = await httpClient.post(
       `${webserver.origin}/bank`,
       inputCreate,
     )
-    const bankId = responseCreate.data.id
+    const bankId = responseCreate.body.id
 
     const fakeName2 = `Test ${Math.random()}`
 
@@ -363,16 +371,16 @@ test.each([
       url: 'test4.changed.com',
     }
 
-    const response = await axios.put(
+    const response = await httpClient.put(
       `${webserver.origin}/bank/${bankId}`,
       inputUpdate,
     )
 
-    expect(response.status).toBe(422)
-    expect(response.data.code).toBe('DOMAIN_ERROR')
-    expect(response.data.message).toBe('Invalid code')
+    expect(response.statusCode).toBe(422)
+    expect(response.body.code).toBe('DOMAIN_ERROR')
+    expect(response.body.message).toBe('Invalid code')
 
-    await axios.delete(`${webserver.origin}/bank/${bankId}`)
+    await httpClient.delete(`${webserver.origin}/bank/${bankId}`)
   },
 )
 
@@ -385,14 +393,14 @@ test('Should not update a bank that does not exist (PUT /bank)', async () => {
     url: 'test4.changed.com',
   }
 
-  const response = await axios.put(
+  const response = await httpClient.put(
     `${webserver.origin}/bank/999999`,
     inputUpdate,
   )
 
-  expect(response.status).toBe(404)
-  expect(response.data.code).toBe('NOT_FOUND_ERROR')
-  expect(response.data.message).toBe('Bank not found')
+  expect(response.statusCode).toBe(404)
+  expect(response.body.code).toBe('NOT_FOUND_ERROR')
+  expect(response.body.message).toBe('Bank not found')
 })
 
 test('Should not update a bank with an existing name (PUT /bank)', async () => {
@@ -405,12 +413,12 @@ test('Should not update a bank with an existing name (PUT /bank)', async () => {
     url: 'test4.com',
   }
 
-  const responseFirstBank = await axios.post(
+  const responseFirstBank = await httpClient.post(
     `${webserver.origin}/bank`,
     firstBankInput,
   )
 
-  const firstBankId = responseFirstBank.data.id
+  const firstBankId = responseFirstBank.body.id
 
   const fakeCode2 = `${Math.random()}`.substring(2, 5)
   const fakeName2 = `Test ${Math.random()}`
@@ -421,14 +429,14 @@ test('Should not update a bank with an existing name (PUT /bank)', async () => {
     url: 'test4.com',
   }
 
-  const responseSecondBank = await axios.post(
+  const responseSecondBank = await httpClient.post(
     `${webserver.origin}/bank`,
     secondBankInput,
   )
 
-  const secondBankId = responseSecondBank.data.id
+  const secondBankId = responseSecondBank.body.id
 
-  const responseUpdate = await axios.put(
+  const responseUpdate = await httpClient.put(
     `${webserver.origin}/bank/${firstBankId}`,
     {
       code: fakeCode1,
@@ -437,12 +445,12 @@ test('Should not update a bank with an existing name (PUT /bank)', async () => {
     },
   )
 
-  expect(responseUpdate.status).toBe(422)
-  expect(responseUpdate.data.code).toBe('APPLICATION_ERROR')
-  expect(responseUpdate.data.message).toBe('Bank name already exists')
+  expect(responseUpdate.statusCode).toBe(422)
+  expect(responseUpdate.body.code).toBe('APPLICATION_ERROR')
+  expect(responseUpdate.body.message).toBe('Bank name already exists')
 
-  await axios.delete(`${webserver.origin}/bank/${firstBankId}`)
-  await axios.delete(`${webserver.origin}/bank/${secondBankId}`)
+  await httpClient.delete(`${webserver.origin}/bank/${firstBankId}`)
+  await httpClient.delete(`${webserver.origin}/bank/${secondBankId}`)
 })
 
 test('Should not update a bank with an existing code (PUT /bank)', async () => {
@@ -455,12 +463,12 @@ test('Should not update a bank with an existing code (PUT /bank)', async () => {
     url: 'test4.com',
   }
 
-  const responseFirstBank = await axios.post(
+  const responseFirstBank = await httpClient.post(
     `${webserver.origin}/bank`,
     firstBankInput,
   )
 
-  const firstBankId = responseFirstBank.data.id
+  const firstBankId = responseFirstBank.body.id
 
   const fakeName2 = `Test ${Math.random()}`
 
@@ -474,14 +482,14 @@ test('Should not update a bank with an existing code (PUT /bank)', async () => {
   // então usamos outro code para criá-lo.
   const fakeCode2 = `${Math.random()}`.substring(2, 5)
 
-  const responseSecondBank = await axios.post(`${webserver.origin}/bank`, {
+  const responseSecondBank = await httpClient.post(`${webserver.origin}/bank`, {
     ...secondBankInput,
     code: fakeCode2,
   })
 
-  const secondBankId = responseSecondBank.data.id
+  const secondBankId = responseSecondBank.body.id
 
-  const responseUpdate = await axios.put(
+  const responseUpdate = await httpClient.put(
     `${webserver.origin}/bank/${firstBankId}`,
     {
       code: fakeCode2,
@@ -490,12 +498,12 @@ test('Should not update a bank with an existing code (PUT /bank)', async () => {
     },
   )
 
-  expect(responseUpdate.status).toBe(422)
-  expect(responseUpdate.data.code).toBe('APPLICATION_ERROR')
-  expect(responseUpdate.data.message).toBe('Bank code already exists')
+  expect(responseUpdate.statusCode).toBe(422)
+  expect(responseUpdate.body.code).toBe('APPLICATION_ERROR')
+  expect(responseUpdate.body.message).toBe('Bank code already exists')
 
-  await axios.delete(`${webserver.origin}/bank/${firstBankId}`)
-  await axios.delete(`${webserver.origin}/bank/${secondBankId}`)
+  await httpClient.delete(`${webserver.origin}/bank/${firstBankId}`)
+  await httpClient.delete(`${webserver.origin}/bank/${secondBankId}`)
 })
 
 test('Should delete a bank (DELETE /bank)', async () => {
@@ -507,22 +515,22 @@ test('Should delete a bank (DELETE /bank)', async () => {
     url: 'test_delete.com',
   }
 
-  const responseCreate = await axios.post(
+  const responseCreate = await httpClient.post(
     `${webserver.origin}/bank`,
     inputCreate,
   )
-  const outputCreate = responseCreate.data
+  const outputCreate = responseCreate.body
 
   const bankId = outputCreate.id
 
-  const responseDelete = await axios.delete(
+  const responseDelete = await httpClient.delete(
     `${webserver.origin}/bank/${bankId}`,
   )
 
-  expect(responseDelete.status).toBe(200)
+  expect(responseDelete.statusCode).toBe(200)
 
-  const responseGet = await axios.get(`${webserver.origin}/bank/${bankId}`)
+  const responseGet = await httpClient.get(`${webserver.origin}/bank/${bankId}`)
 
-  expect(responseGet.status).toBe(404)
-  expect(responseGet.data?.id).toBeFalsy()
+  expect(responseGet.statusCode).toBe(404)
+  expect(responseGet.body?.id).toBeFalsy()
 })

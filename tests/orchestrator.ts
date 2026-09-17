@@ -1,14 +1,16 @@
+import { AxiosAdapter, HttpClient } from '@http-client.ts'
 import { migrator } from '@infra/migrator.ts'
 import { webserver } from '@infra/webserver.ts'
 import retry from 'async-retry'
-import axios from 'axios'
 
 async function waitForAllServices() {
+  const httpClient: HttpClient = new AxiosAdapter()
+
   async function waitForWebServer() {
     async function fetchStatusPage() {
-      const response = await axios.get(`${webserver.origin}/status`)
+      const response = await httpClient.get(`${webserver.origin}/status`)
 
-      if (response.status !== 200) {
+      if (response.statusCode !== 200) {
         throw new Error()
       }
     }
