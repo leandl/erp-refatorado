@@ -1,8 +1,5 @@
-import { ApplicationError } from '@application-error.ts'
 import { HttpRestServer } from '@bank-rest-controller.ts'
-import { DomainError } from '@domain-error.ts'
-import { ExpectedError } from '@expected-error.ts'
-import { NotFoundError } from '@not-found-error.ts'
+import { ErrorMapper } from '@error-mapper.ts'
 import cors from 'cors'
 import express, { Express, Request, Response } from 'express'
 
@@ -35,40 +32,12 @@ export class ExpressAdapter implements HttpRestServer {
 
           const response = await callback(request)
 
-          responseExpress.status(response.statusCode).json(response.body)
+          return responseExpress.status(response.statusCode).json(response.body)
         } catch (error: unknown) {
-          if (!(error instanceof ExpectedError)) {
-            return responseExpress.status(500).json({
-              code: 'SERVER_ERROR',
-              message: 'Internal server error',
-            })
-          }
-
-          if (error instanceof NotFoundError) {
-            return responseExpress.status(404).json({
-              code: error.code,
-              message: error.message,
-            })
-          }
-
-          if (error instanceof DomainError) {
-            return responseExpress.status(422).json({
-              code: error.code,
-              message: error.message,
-            })
-          }
-
-          if (error instanceof ApplicationError) {
-            return responseExpress.status(422).json({
-              code: error.code,
-              message: error.message,
-            })
-          }
-
-          return responseExpress.status(500).json({
-            code: 'SERVER_ERROR',
-            message: 'Internal server error',
-          })
+          const responseError = await ErrorMapper.toRestResponse(error)
+          return responseExpress
+            .status(responseError.statusCode)
+            .json(responseError.body)
         }
       },
     )
