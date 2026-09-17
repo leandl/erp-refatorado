@@ -1,4 +1,5 @@
-import { AxiosAdapter, HttpClient } from '@http-client.ts'
+import { FetchAdapter } from '@fetch-adapter.ts'
+import { HttpClient } from '@http-client.ts'
 import { webserver } from '@infra/webserver.ts'
 
 import { orchestrator } from '../orchestrator.ts'
@@ -10,7 +11,7 @@ beforeAll(async () => {
   await orchestrator.clearDatabase()
   await orchestrator.runPendingMigrations()
 
-  httpClient = new AxiosAdapter()
+  httpClient = new FetchAdapter()
 })
 
 interface Bank {

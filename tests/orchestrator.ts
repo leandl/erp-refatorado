@@ -1,10 +1,10 @@
-import { AxiosAdapter, HttpClient } from '@http-client.ts'
+import { FetchAdapter } from '@fetch-adapter.ts'
 import { migrator } from '@infra/migrator.ts'
 import { webserver } from '@infra/webserver.ts'
 import retry from 'async-retry'
 
 async function waitForAllServices() {
-  const httpClient: HttpClient = new AxiosAdapter()
+  const httpClient = new FetchAdapter()
 
   async function waitForWebServer() {
     async function fetchStatusPage() {
