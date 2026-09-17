@@ -25,6 +25,10 @@ export class FetchAdapter implements HttpClient {
     const response = await fetch(url, {
       method,
       body: body ? JSON.stringify(body) : undefined,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
     })
 
     const responseBody = await this.parseBody(response)

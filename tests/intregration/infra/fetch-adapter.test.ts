@@ -14,6 +14,17 @@ afterEach(() => {
   nock.cleanAll()
 })
 
+function makeFetchOptions(method: string, body?: unknown) {
+  return {
+    method,
+    body: body ? JSON.stringify(body) : undefined,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  }
+}
+
 test('Should return the correct data when the GET request responds with 2xx', async () => {
   const origin = 'http://localhost:4321'
   const path = '/user'
@@ -29,7 +40,7 @@ test('Should return the correct data when the GET request responds with 2xx', as
 
   expect(getSpy.calledOnce).toBeTruthy()
   expect(
-    getSpy.calledWith(`${origin}${path}`, { method: 'GET', body: undefined }),
+    getSpy.calledWith(`${origin}${path}`, makeFetchOptions('GET')),
   ).toBeTruthy()
 
   expect(response.statusCode).toBe(expectedCode)
@@ -48,7 +59,7 @@ test('Should return an empty body when the GET request responds with 2xx', async
 
   expect(getSpy.calledOnce).toBeTruthy()
   expect(
-    getSpy.calledWith(`${origin}${path}`, { method: 'GET', body: undefined }),
+    getSpy.calledWith(`${origin}${path}`, makeFetchOptions('GET')),
   ).toBeTruthy()
 
   expect(response.statusCode).toBe(expectedCode)
@@ -70,7 +81,7 @@ test('Should return the correct data when the GET request responds with 4xx', as
 
   expect(getSpy.calledOnce).toBeTruthy()
   expect(
-    getSpy.calledWith(`${origin}${path}`, { method: 'GET', body: undefined }),
+    getSpy.calledWith(`${origin}${path}`, makeFetchOptions('GET')),
   ).toBeTruthy()
 
   expect(response.statusCode).toBe(expectedCode)
@@ -92,7 +103,7 @@ test('Should return the correct data when the GET request responds with 5xx', as
 
   expect(getSpy.calledOnce).toBeTruthy()
   expect(
-    getSpy.calledWith(`${origin}${path}`, { method: 'GET', body: undefined }),
+    getSpy.calledWith(`${origin}${path}`, makeFetchOptions('GET')),
   ).toBeTruthy()
 
   expect(response.statusCode).toBe(expectedCode)
@@ -114,10 +125,10 @@ test('Should return the correct data when the POST request responds with 2xx', a
 
   expect(postSpy.calledOnce).toBeTruthy()
   expect(
-    postSpy.calledWith(`${origin}${path}`, {
-      method: 'POST',
-      body: JSON.stringify(expectedBody),
-    }),
+    postSpy.calledWith(
+      `${origin}${path}`,
+      makeFetchOptions('POST', expectedBody),
+    ),
   ).toBeTruthy()
 
   expect(response.statusCode).toBe(expectedCode)
@@ -139,10 +150,10 @@ test('Should return the correct data when the PUT request responds with 2xx', as
 
   expect(putSpy.calledOnce).toBeTruthy()
   expect(
-    putSpy.calledWith(`${origin}${path}`, {
-      method: 'PUT',
-      body: JSON.stringify(expectedBody),
-    }),
+    putSpy.calledWith(
+      `${origin}${path}`,
+      makeFetchOptions('PUT', expectedBody),
+    ),
   ).toBeTruthy()
 
   expect(response.statusCode).toBe(expectedCode)
@@ -164,10 +175,7 @@ test('Should return the correct data when the DELETE request responds with 2xx',
 
   expect(deleteSpy.calledOnce).toBeTruthy()
   expect(
-    deleteSpy.calledWith(`${origin}${path}`, {
-      method: 'DELETE',
-      body: undefined,
-    }),
+    deleteSpy.calledWith(`${origin}${path}`, makeFetchOptions('DELETE')),
   ).toBeTruthy()
 
   expect(response.statusCode).toBe(expectedCode)
