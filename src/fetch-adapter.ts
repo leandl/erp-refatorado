@@ -22,20 +22,25 @@ export class FetchAdapter implements HttpClient {
     url: string,
     body?: unknown,
   ): Promise<HttpClient.Response> {
-    const response = await fetch(url, {
-      method,
-      body: body ? JSON.stringify(body) : undefined,
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+    }
 
-    const responseBody = await this.parseBody(response)
+    const request: RequestInit = {
+      method,
+      headers,
+    }
+
+    if (body !== undefined) {
+      headers['Content-Type'] = 'application/json'
+      request.body = JSON.stringify(body)
+    }
+
+    const response = await fetch(url, request)
 
     return {
       statusCode: response.status,
-      body: responseBody,
+      body: await this.parseBody(response),
     }
   }
 

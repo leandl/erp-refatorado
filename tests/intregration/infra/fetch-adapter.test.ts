@@ -16,14 +16,21 @@ afterEach(() => {
 })
 
 function makeFetchOptions(method: string, body?: unknown) {
-  return {
-    method,
-    body: body ? JSON.stringify(body) : undefined,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
   }
+
+  const options: RequestInit = {
+    method,
+    headers,
+  }
+
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json'
+    options.body = JSON.stringify(body)
+  }
+
+  return options
 }
 
 test('Should return the correct data when the GET request responds with 2xx', async () => {
