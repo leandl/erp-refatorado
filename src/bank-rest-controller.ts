@@ -6,7 +6,7 @@ import { UpdateBank } from '@update-bank.ts'
 
 export interface HttpRestServer {
   register(
-    method: string,
+    method: HttpRestServer.AcceptedMethods,
     url: string,
     callback: (
       request: HttpRestServer.Request,
@@ -25,6 +25,8 @@ export namespace HttpRestServer {
     statusCode: number
     body: any
   }
+  export const AcceptedMethodsList = ['GET', 'POST', 'PUT', 'DELETE'] as const
+  export type AcceptedMethods = (typeof AcceptedMethodsList)[number]
 }
 
 export class BankRestController {
@@ -37,7 +39,7 @@ export class BankRestController {
     private removeBank: RemoveBank,
   ) {
     this.httpServer.register(
-      'get',
+      'GET',
       '/bank',
       async (): Promise<HttpRestServer.Response> => {
         const output = await this.getBankList.execute()
@@ -49,7 +51,7 @@ export class BankRestController {
     )
 
     this.httpServer.register(
-      'get',
+      'GET',
       '/bank/:id',
       async (
         request: HttpRestServer.Request,
@@ -66,7 +68,7 @@ export class BankRestController {
     )
 
     this.httpServer.register(
-      'post',
+      'POST',
       '/bank',
       async (
         request: HttpRestServer.Request,
@@ -85,7 +87,7 @@ export class BankRestController {
     )
 
     this.httpServer.register(
-      'put',
+      'PUT',
       '/bank/:id',
       async (
         request: HttpRestServer.Request,
@@ -105,7 +107,7 @@ export class BankRestController {
     )
 
     this.httpServer.register(
-      'delete',
+      'DELETE',
       '/bank/:id',
       async (
         request: HttpRestServer.Request,

@@ -3,6 +3,16 @@ import { ErrorMapper } from '@error-mapper.ts'
 import cors from 'cors'
 import express, { Express, Request, Response } from 'express'
 
+const expressMethods: Record<
+  HttpRestServer.AcceptedMethods,
+  'get' | 'post' | 'put' | 'delete'
+> = {
+  GET: 'get',
+  POST: 'post',
+  PUT: 'put',
+  DELETE: 'delete',
+}
+
 export class ExpressAdapter implements HttpRestServer {
   private server: Express
 
@@ -14,13 +24,14 @@ export class ExpressAdapter implements HttpRestServer {
   }
 
   register(
-    method: string,
+    method: HttpRestServer.AcceptedMethods,
     url: string,
     callback: (
       request: HttpRestServer.Request,
     ) => Promise<HttpRestServer.Response>,
   ): void {
-    const methodExpress = method as 'get' | 'post' | 'put' | 'delete'
+    const methodExpress = expressMethods[method]
+
     this.server[methodExpress](
       url,
       async (requestExpress: Request, responseExpress: Response) => {

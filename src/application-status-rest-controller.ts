@@ -7,7 +7,7 @@ export class ApplicationStatusRestController {
     private getApplicationStatus: GetApplicationStatus,
   ) {
     this.httpServer.register(
-      'get',
+      'GET',
       '/status',
       async (): Promise<HttpRestServer.Response> => {
         const output = await this.getApplicationStatus.execute()

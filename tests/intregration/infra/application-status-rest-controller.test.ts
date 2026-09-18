@@ -19,6 +19,6 @@ test('Should register application status route on the HTTP server', () => {
   expect(registerSpy.callCount).toBe(1)
 
   expect(
-    registerSpy.calledWithExactly('get', '/status', Sinon.match.func),
+    registerSpy.calledWithExactly('GET', '/status', Sinon.match.func),
   ).toBeTruthy()
 })
