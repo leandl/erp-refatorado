@@ -1,3 +1,4 @@
+import { HttpRestServer } from '@bank-rest-controller.ts'
 import { FetchAdapter } from '@fetch-adapter.ts'
 import { HttpClient } from '@http-client.ts'
 import nock from 'nock'
@@ -28,7 +29,7 @@ function makeFetchOptions(method: string, body?: unknown) {
 test('Should return the correct data when the GET request responds with 2xx', async () => {
   const origin = 'http://localhost:4321'
   const path = '/user'
-  const expectedCode = 200
+  const expectedCode = HttpRestServer.StatusCode.OK
   const expectedBody = {
     test: 'test',
   }
@@ -69,7 +70,7 @@ test('Should return an empty body when the GET request responds with 2xx', async
 test('Should return the correct data when the GET request responds with 4xx', async () => {
   const origin = 'http://localhost:4321'
   const path = '/user'
-  const expectedCode = 404
+  const expectedCode = HttpRestServer.StatusCode.NOT_FOUND
   const expectedBody = {
     message: 'User not found',
   }
@@ -91,7 +92,7 @@ test('Should return the correct data when the GET request responds with 4xx', as
 test('Should return the correct data when the GET request responds with 5xx', async () => {
   const origin = 'http://localhost:4321'
   const path = '/user'
-  const expectedCode = 500
+  const expectedCode = HttpRestServer.StatusCode.INTERNAL_SERVER_ERROR
   const expectedBody = {
     message: 'Internal server error',
   }
@@ -113,7 +114,7 @@ test('Should return the correct data when the GET request responds with 5xx', as
 test('Should return the correct data when the POST request responds with 2xx', async () => {
   const origin = 'http://localhost:4321'
   const path = '/user'
-  const expectedCode = 200
+  const expectedCode = HttpRestServer.StatusCode.OK
   const expectedBody = {
     test: 'test',
   }
@@ -138,7 +139,7 @@ test('Should return the correct data when the POST request responds with 2xx', a
 test('Should return the correct data when the PUT request responds with 2xx', async () => {
   const origin = 'http://localhost:4321'
   const path = '/user'
-  const expectedCode = 200
+  const expectedCode = HttpRestServer.StatusCode.OK
   const expectedBody = {
     test: 'test',
   }
@@ -163,7 +164,7 @@ test('Should return the correct data when the PUT request responds with 2xx', as
 test('Should return the correct data when the DELETE request responds with 2xx', async () => {
   const origin = 'http://localhost:4321'
   const path = '/user'
-  const expectedCode = 200
+  const expectedCode = HttpRestServer.StatusCode.OK
   const expectedBody = {
     test: 'test',
   }

@@ -9,7 +9,7 @@ export class ErrorMapper {
   ): Promise<HttpRestServer.Response> {
     if (error instanceof NotFoundError) {
       return {
-        statusCode: 404,
+        statusCode: HttpRestServer.StatusCode.NOT_FOUND,
         body: {
           code: error.code,
           message: error.message,
@@ -19,7 +19,7 @@ export class ErrorMapper {
 
     if (error instanceof DomainError) {
       return {
-        statusCode: 422,
+        statusCode: HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
         body: {
           code: error.code,
           message: error.message,
@@ -29,7 +29,7 @@ export class ErrorMapper {
 
     if (error instanceof ApplicationError) {
       return {
-        statusCode: 422,
+        statusCode: HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
         body: {
           code: error.code,
           message: error.message,
@@ -38,7 +38,7 @@ export class ErrorMapper {
     }
 
     return {
-      statusCode: 500,
+      statusCode: HttpRestServer.StatusCode.INTERNAL_SERVER_ERROR,
       body: {
         code: 'SERVER_ERROR',
         message: 'Internal server error',

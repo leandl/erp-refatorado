@@ -1,3 +1,4 @@
+import { HttpRestServer } from '@bank-rest-controller.ts'
 import { FetchAdapter } from '@fetch-adapter.ts'
 import { migrator } from '@infra/migrator.ts'
 import { webserver } from '@infra/webserver.ts'
@@ -10,7 +11,7 @@ async function waitForAllServices() {
     async function fetchStatusPage() {
       const response = await httpClient.get(`${webserver.origin}/status`)
 
-      if (response.statusCode !== 200) {
+      if (response.statusCode !== HttpRestServer.StatusCode.OK) {
         throw new Error()
       }
     }

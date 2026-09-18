@@ -13,7 +13,7 @@ export class ApplicationStatusRestController {
         const output = await this.getApplicationStatus.execute()
 
         return {
-          statusCode: 200,
+          statusCode: HttpRestServer.StatusCode.OK,
           body: output,
         }
       },

@@ -1,3 +1,4 @@
+import { HttpRestServer } from '@bank-rest-controller.ts'
 import { FetchAdapter } from '@fetch-adapter.ts'
 import { HttpClient } from '@http-client.ts'
 import { webserver } from '@infra/webserver.ts'
@@ -37,7 +38,7 @@ test('Should return the list of banks (GET /bank)', async () => {
   const response = await httpClient.get(`${webserver.origin}/bank`)
   const output = response.body
 
-  expect(response.statusCode).toBe(200)
+  expect(response.statusCode).toBe(HttpRestServer.StatusCode.OK)
   expect(output).toBeInstanceOf(Array)
   expect(output.length).toBeGreaterThanOrEqual(1)
 
@@ -69,7 +70,7 @@ test('Should return a bank (GET /bank/:ID)', async () => {
   const response = await httpClient.get(`${webserver.origin}/bank/${bankId}`)
   const output = response.body
 
-  expect(response.statusCode).toBe(200)
+  expect(response.statusCode).toBe(HttpRestServer.StatusCode.OK)
   expect(output.id).toBe(bankId)
   expect(output.code).toBe(inputCreate.code)
   expect(output.name).toBe(inputCreate.name)
@@ -80,7 +81,7 @@ test('Should return a bank (GET /bank/:ID)', async () => {
 test('Should not return a bank that does not exist (GET /bank/:ID)', async () => {
   const response = await httpClient.get(`${webserver.origin}/bank/999999`)
 
-  expect(response.statusCode).toBe(404)
+  expect(response.statusCode).toBe(HttpRestServer.StatusCode.NOT_FOUND)
   expect(response.body.code).toBe('NOT_FOUND_ERROR')
   expect(response.body.message).toBe('Bank not found')
 })
@@ -100,7 +101,7 @@ test('Should create a bank (POST /bank)', async () => {
   )
   const outputCreate = responseCreate.body
 
-  expect(responseCreate.statusCode).toBe(201)
+  expect(responseCreate.statusCode).toBe(HttpRestServer.StatusCode.CREATED)
   expect(outputCreate.id).toBeTruthy()
   expect(outputCreate.code).toBe(inputCreate.code)
   expect(outputCreate.name).toBe(inputCreate.name)
@@ -134,7 +135,9 @@ test.each(['', undefined, null, 'Test'])(
       inputCreate,
     )
 
-    expect(response.statusCode).toBe(422)
+    expect(response.statusCode).toBe(
+      HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
+    )
     expect(response.body.code).toBe('DOMAIN_ERROR')
     expect(response.body.message).toBe('Invalid name')
   },
@@ -166,7 +169,9 @@ test.each([
       inputCreate,
     )
 
-    expect(response.statusCode).toBe(422)
+    expect(response.statusCode).toBe(
+      HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
+    )
     expect(response.body.code).toBe('DOMAIN_ERROR')
     expect(response.body.message).toBe('Invalid code')
   },
@@ -187,7 +192,7 @@ test('Should not create a bank with an existing code (POST /bank)', async () => 
     firstBankInput,
   )
 
-  expect(responseCreate.statusCode).toBe(201)
+  expect(responseCreate.statusCode).toBe(HttpRestServer.StatusCode.CREATED)
 
   const fakeName2 = `Test ${Math.random()}`
 
@@ -202,7 +207,9 @@ test('Should not create a bank with an existing code (POST /bank)', async () => 
     secondBankInput,
   )
 
-  expect(responseDuplicate.statusCode).toBe(422)
+  expect(responseDuplicate.statusCode).toBe(
+    HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
+  )
   expect(responseDuplicate.body.code).toBe('APPLICATION_ERROR')
   expect(responseDuplicate.body.message).toBe('Bank code already exists')
 
@@ -224,7 +231,7 @@ test('Should not create a bank with an existing name (POST /bank)', async () => 
     firstBankInput,
   )
 
-  expect(responseCreate.statusCode).toBe(201)
+  expect(responseCreate.statusCode).toBe(HttpRestServer.StatusCode.CREATED)
 
   const fakeCode2 = `${Math.random()}`.substring(2, 5)
 
@@ -239,7 +246,9 @@ test('Should not create a bank with an existing name (POST /bank)', async () => 
     secondBankInput,
   )
 
-  expect(responseDuplicate.statusCode).toBe(422)
+  expect(responseDuplicate.statusCode).toBe(
+    HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
+  )
   expect(responseDuplicate.body.code).toBe('APPLICATION_ERROR')
   expect(responseDuplicate.body.message).toBe('Bank name already exists')
 
@@ -279,7 +288,7 @@ test('Should update a bank (PUT /bank)', async () => {
 
   const outputUpdate = responseUpdate.body
 
-  expect(responseUpdate.statusCode).toBe(200)
+  expect(responseUpdate.statusCode).toBe(HttpRestServer.StatusCode.OK)
   expect(outputUpdate.id).toBe(bankId)
   expect(outputUpdate.code).toBe(inputUpdate.code)
   expect(outputUpdate.name).toBe(inputUpdate.name)
@@ -328,7 +337,9 @@ test.each(['', undefined, null, 'Test'])(
       inputUpdate,
     )
 
-    expect(response.statusCode).toBe(422)
+    expect(response.statusCode).toBe(
+      HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
+    )
     expect(response.body.code).toBe('DOMAIN_ERROR')
     expect(response.body.message).toBe('Invalid name')
 
@@ -377,7 +388,9 @@ test.each([
       inputUpdate,
     )
 
-    expect(response.statusCode).toBe(422)
+    expect(response.statusCode).toBe(
+      HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
+    )
     expect(response.body.code).toBe('DOMAIN_ERROR')
     expect(response.body.message).toBe('Invalid code')
 
@@ -399,7 +412,7 @@ test('Should not update a bank that does not exist (PUT /bank)', async () => {
     inputUpdate,
   )
 
-  expect(response.statusCode).toBe(404)
+  expect(response.statusCode).toBe(HttpRestServer.StatusCode.NOT_FOUND)
   expect(response.body.code).toBe('NOT_FOUND_ERROR')
   expect(response.body.message).toBe('Bank not found')
 })
@@ -446,7 +459,9 @@ test('Should not update a bank with an existing name (PUT /bank)', async () => {
     },
   )
 
-  expect(responseUpdate.statusCode).toBe(422)
+  expect(responseUpdate.statusCode).toBe(
+    HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
+  )
   expect(responseUpdate.body.code).toBe('APPLICATION_ERROR')
   expect(responseUpdate.body.message).toBe('Bank name already exists')
 
@@ -499,7 +514,9 @@ test('Should not update a bank with an existing code (PUT /bank)', async () => {
     },
   )
 
-  expect(responseUpdate.statusCode).toBe(422)
+  expect(responseUpdate.statusCode).toBe(
+    HttpRestServer.StatusCode.UNPROCESSABLE_ENTITY,
+  )
   expect(responseUpdate.body.code).toBe('APPLICATION_ERROR')
   expect(responseUpdate.body.message).toBe('Bank code already exists')
 
@@ -528,10 +545,10 @@ test('Should delete a bank (DELETE /bank)', async () => {
     `${webserver.origin}/bank/${bankId}`,
   )
 
-  expect(responseDelete.statusCode).toBe(200)
+  expect(responseDelete.statusCode).toBe(HttpRestServer.StatusCode.OK)
 
   const responseGet = await httpClient.get(`${webserver.origin}/bank/${bankId}`)
 
-  expect(responseGet.statusCode).toBe(404)
+  expect(responseGet.statusCode).toBe(HttpRestServer.StatusCode.NOT_FOUND)
   expect(responseGet.body?.id).toBeFalsy()
 })
