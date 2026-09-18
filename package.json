@@ -18,7 +18,7 @@
     "services:up": "docker compose --env-file .env.dev -f infra/compose.yaml up -d",
     "services:stop": "docker compose --env-file .env.dev -f infra/compose.yaml stop",
     "services:down": "docker compose --env-file .env.dev -f infra/compose.yaml down",
-    "services:wait:database": "node ./infra/scripts/wait-for-mariadb.js"
+    "services:wait:database": "node ./infra/scripts/wait-for-database.js"
   },
   "keywords": [],
   "author": "",
