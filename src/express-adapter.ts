@@ -34,19 +34,19 @@ export class ExpressAdapter implements HttpRestServer {
 
     this.server[methodExpress](
       url,
-      async (requestExpress: Request, responseExpress: Response) => {
+      async (expressRequest: Request, expressResponse: Response) => {
         try {
           const request: HttpRestServer.Request = {
-            body: requestExpress.body,
-            params: requestExpress.params,
+            body: expressRequest.body,
+            params: expressRequest.params,
           }
 
           const response = await callback(request)
 
-          return responseExpress.status(response.statusCode).json(response.body)
+          return expressResponse.status(response.statusCode).json(response.body)
         } catch (error: unknown) {
           const responseError = await ErrorMapper.toRestResponse(error)
-          return responseExpress
+          return expressResponse
             .status(responseError.statusCode)
             .json(responseError.body)
         }
@@ -55,8 +55,10 @@ export class ExpressAdapter implements HttpRestServer {
   }
 
   listen(port: number): void {
-    this.server.listen(port, () => {
-      console.log(`Server running at http://localhost:${port}`)
+    this.server.listen(port, (err) => {
+      if (!err) {
+        console.log(`Server running with express at http://localhost:${port}`)
+      }
     })
   }
 }

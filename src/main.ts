@@ -3,6 +3,7 @@ import { BankRepositoryDatabase } from '@bank-repository.ts'
 import { BankRestController } from '@bank-rest-controller.ts'
 import { CreateBank } from '@create-bank.ts'
 import { ExpressAdapter } from '@express-adapter.ts'
+import { FastifyAdapter } from '@fastify-adapter.ts'
 import { GetApplicationStatus } from '@get-application-status.ts'
 import { GetBankById } from '@get-bank-by-id.ts'
 import { GetBankList } from '@get-bank-list.ts'
@@ -13,6 +14,7 @@ import { UpdateBank } from '@update-bank.ts'
 const databaseConnection = new MysqlAdapter(String(process.env.DATABASE_URL))
 const bankRepository = new BankRepositoryDatabase(databaseConnection)
 const httpRestServer = new ExpressAdapter()
+const _httpRestServer = new FastifyAdapter()
 
 const getBankList = new GetBankList(bankRepository)
 const getBankById = new GetBankById(bankRepository)
