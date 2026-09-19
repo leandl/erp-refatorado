@@ -11,12 +11,12 @@ export interface BankRepository {
   remove(bankId: number): Promise<void>
 }
 
-export class BankRepositoryDatabase implements BankRepository {
+export class BankRepositorySQL implements BankRepository {
   constructor(private databaseConnection: DatabaseConnection) {}
 
   async save(bank: Bank): Promise<Bank> {
     const [row] =
-      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+      await this.databaseConnection.query<BankRepositorySQL.BankRow>(
         'INSERT INTO bank(code, name, url) VALUES(:code, :name, :url) RETURNING *',
         {
           ':code': bank.getCode(),
@@ -37,7 +37,7 @@ export class BankRepositoryDatabase implements BankRepository {
 
   async findById(bankId: number): Promise<Bank | undefined> {
     const [firstRow] =
-      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+      await this.databaseConnection.query<BankRepositorySQL.BankRow>(
         'SELECT * FROM bank WHERE bank_id = :bank_id',
         { ':bank_id': bankId },
       )
@@ -56,7 +56,7 @@ export class BankRepositoryDatabase implements BankRepository {
 
   async findByCode(code: string): Promise<Bank | undefined> {
     const [firstRow] =
-      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+      await this.databaseConnection.query<BankRepositorySQL.BankRow>(
         'SELECT * FROM bank WHERE code = :code',
         { ':code': code },
       )
@@ -75,7 +75,7 @@ export class BankRepositoryDatabase implements BankRepository {
 
   async findByName(name: string): Promise<Bank | undefined> {
     const [firstRow] =
-      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+      await this.databaseConnection.query<BankRepositorySQL.BankRow>(
         'SELECT * FROM bank WHERE name = :name',
         { ':name': name },
       )
@@ -93,7 +93,7 @@ export class BankRepositoryDatabase implements BankRepository {
   }
 
   async update(bank: Bank): Promise<void> {
-    await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+    await this.databaseConnection.query<BankRepositorySQL.BankRow>(
       'UPDATE bank SET code = :code, name = :name, url = :url WHERE bank_id = :bank_id',
       {
         ':bank_id': bank.getBankId(),
@@ -106,7 +106,7 @@ export class BankRepositoryDatabase implements BankRepository {
 
   async list(): Promise<Bank[]> {
     const rows =
-      await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+      await this.databaseConnection.query<BankRepositorySQL.BankRow>(
         'SELECT * FROM bank',
       )
 
@@ -121,7 +121,7 @@ export class BankRepositoryDatabase implements BankRepository {
   }
 
   async remove(bankId: number): Promise<void> {
-    await this.databaseConnection.query<BankRepositoryDatabase.BankRow>(
+    await this.databaseConnection.query<BankRepositorySQL.BankRow>(
       'DELETE FROM bank WHERE bank_id = :bank_id',
       {
         ':bank_id': bankId,
@@ -130,7 +130,7 @@ export class BankRepositoryDatabase implements BankRepository {
   }
 }
 
-namespace BankRepositoryDatabase {
+namespace BankRepositorySQL {
   export type BankRow = {
     bank_id: number
     name: string

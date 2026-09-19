@@ -1,5 +1,5 @@
 import { ApplicationStatusRestController } from '@application-status-rest-controller.ts'
-import { BankRepositoryDatabase } from '@bank-repository.ts'
+import { BankRepositorySQL } from '@bank-repository.ts'
 import { BankRestController } from '@bank-rest-controller.ts'
 import { CreateBank } from '@create-bank.ts'
 import { ExpressAdapter } from '@express-adapter.ts'
@@ -23,7 +23,7 @@ const databaseConnection = new MysqlAdapter(
 //   String(process.env.DATABASE_SQLITE_FILENAME),
 // )
 
-const bankRepository = new BankRepositoryDatabase(databaseConnection)
+const bankRepository = new BankRepositorySQL(databaseConnection)
 const httpRestServer = new ExpressAdapter()
 const _httpRestServer = new FastifyAdapter()
 
