@@ -1,27 +1,35 @@
-import knex from 'knex'
+import knex, { type Knex } from 'knex'
 
-import config from '../knexfile.ts'
+import config, { connections } from '../knexfile.ts'
 
-const database = knex(config)
-
-async function listPendingMigrations() {
-  const [_batch, log] = await database.migrate.list()
-
-  return log
+type Migrator = {
+  listPendingMigrations: () => Promise<string[]>
+  runPendingMigrations: () => Promise<string[]>
+  clearDatabase: () => Promise<void>
 }
 
-async function runPendingMigrations() {
-  const [_batch, log] = await database.migrate.latest()
+function createMigrator(database: Knex): Migrator {
+  return {
+    async listPendingMigrations() {
+      const [_batch, log] = await database.migrate.list()
 
-  return log
-}
+      return log
+    },
 
-async function clearDatabase() {
-  await database.migrate.rollback(undefined, true)
+    async runPendingMigrations() {
+      const [_batch, log] = await database.migrate.latest()
+
+      return log
+    },
+
+    async clearDatabase() {
+      await database.migrate.rollback(undefined, true)
+    },
+  }
 }
 
 export const migrator = {
-  listPendingMigrations,
-  runPendingMigrations,
-  clearDatabase,
-}
+  default: createMigrator(knex(config)),
+  mysql: createMigrator(knex(connections.mysql)),
+  postgres: createMigrator(knex(connections.postgres)),
+} as const

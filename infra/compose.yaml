@@ -1,15 +1,25 @@
 services:
-  database:
-    container_name: "mariadb-dev"
+  database-mysql:
+    container_name: mariadb-dev
     image: mariadb:12.3
     restart: on-failure
     environment:
       MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: ${MYSQL_DB}
-      MARIADB_USER: ${MYSQL_USER}
-      MARIADB_PASSWORD: ${MYSQL_PASSWORD}
+      MARIADB_DATABASE: ${DATABASE_MYSQL_DB}
+      MARIADB_USER: ${DATABASE_MYSQL_USER}
+      MARIADB_PASSWORD: ${DATABASE_MYSQL_PASSWORD}
     ports:
-      - "${MYSQL_PORT}:3306"
+      - "${DATABASE_MYSQL_PORT}:3306"
     command:
       - --character-set-server=utf8mb3
       - --collation-server=utf8mb3_general_ci
+
+  database-pg:
+    container_name: postgres-dev
+    image: postgres:16.0-alpine3.18
+    environment:
+      POSTGRES_DB: ${DATABASE_POSTGRES_DB}
+      POSTGRES_USER: ${DATABASE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DATABASE_POSTGRES_PASSWORD}
+    ports:
+      - "${DATABASE_POSTGRES_PORT}:5432"

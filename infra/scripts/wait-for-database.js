@@ -9,6 +9,11 @@ const databaseByClient = {
       'docker exec mariadb-dev healthcheck.sh --connect --innodb_initialized',
     validate: (error, _stdout) => error === null,
   },
+  pg: {
+    name: 'Postgres',
+    commandHealth: 'docker exec postgres-dev pg_isready --host localhost',
+    validate: (_error, stdout) => stdout.search('accepting connections'),
+  },
 }
 
 const database = databaseByClient[config.client]

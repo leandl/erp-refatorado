@@ -4,6 +4,8 @@ import { migrator } from '@infra/migrator.ts'
 import { webserver } from '@infra/webserver.ts'
 import retry from 'async-retry'
 
+type Database = keyof typeof migrator
+
 async function waitForAllServices() {
   const httpClient = new FetchAdapter()
 
@@ -25,12 +27,12 @@ async function waitForAllServices() {
   await waitForWebServer()
 }
 
-async function clearDatabase() {
-  await migrator.clearDatabase()
+async function clearDatabase(database: Database = 'default') {
+  await migrator[database].clearDatabase()
 }
 
-async function runPendingMigrations() {
-  await migrator.runPendingMigrations()
+async function runPendingMigrations(database: Database = 'default') {
+  await migrator[database].runPendingMigrations()
 }
 
 export const orchestrator = {

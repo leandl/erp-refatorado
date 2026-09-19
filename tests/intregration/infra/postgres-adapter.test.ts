@@ -1,11 +1,13 @@
 import { DatabaseConnection } from '@database-connection.ts'
-import { MysqlAdapter } from '@mysql-adapter.ts'
+import { PostgresAdapter } from '@postgres-adapter.ts'
 import { afterEach, beforeEach, expect, test } from 'vitest'
 
 let databaseConnection: DatabaseConnection
 
-beforeEach(async () => {
-  databaseConnection = new MysqlAdapter(String(process.env.DATABASE_MYSQL_URL))
+beforeEach(() => {
+  databaseConnection = new PostgresAdapter(
+    String(process.env.DATABASE_POSTGRES_URL),
+  )
 })
 
 afterEach(async () => {
@@ -20,7 +22,7 @@ test('Should execute a query', async () => {
   expect(rows).toEqual([{ value: 1 }])
 })
 
-test('Should execute a query with named params', async () => {
+test('Should execute a query with named parameters', async () => {
   const rows = await databaseConnection.query<{ value: number }>(
     'SELECT :value AS value',
     {
@@ -31,7 +33,7 @@ test('Should execute a query with named params', async () => {
   expect(rows).toEqual([{ value: 123 }])
 })
 
-test('Should close connection', async () => {
+test('Should reject queries after closing the connection', async () => {
   await databaseConnection.close()
 
   await expect(databaseConnection.query('SELECT 1')).rejects.toThrow()
