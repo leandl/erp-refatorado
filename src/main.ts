@@ -8,20 +8,20 @@ import { GetApplicationStatus } from '@get-application-status.ts'
 import { GetBankById } from '@get-bank-by-id.ts'
 import { GetBankList } from '@get-bank-list.ts'
 import { MysqlAdapter } from '@mysql-adapter.ts'
-import { PostgresAdapter } from '@postgres-adapter.ts'
 import { RemoveBank } from '@remove-bank.ts'
 import { UpdateBank } from '@update-bank.ts'
 
-// const databaseConnection = new MysqlAdapter(
-//   String(process.env.DATABASE_MYSQL_URL),
-// )
-
-const databaseConnection = new PostgresAdapter(
-  String(process.env.DATABASE_POSTGRES_URL),
-)
-const _databaseConnection = new MysqlAdapter(
+const databaseConnection = new MysqlAdapter(
   String(process.env.DATABASE_MYSQL_URL),
 )
+
+// const databaseConnection = new PostgresAdapter(
+//   String(process.env.DATABASE_POSTGRES_URL),
+// )
+
+// const databaseConnection = new SqliteAdapter(
+//   String(process.env.DATABASE_SQLITE_FILENAME),
+// )
 
 const bankRepository = new BankRepositoryDatabase(databaseConnection)
 const httpRestServer = new ExpressAdapter()

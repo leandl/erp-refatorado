@@ -13,12 +13,27 @@ export class PostgresAdapter implements DatabaseConnection {
 
   async query<T = unknown>(
     statement: string,
-    params?: Record<`:${string}`, unknown>,
+    params?: Record<DatabaseConnection.KeyParam, unknown>,
   ): Promise<T[]> {
+    const { statement: normalizedStatement, values } = this.normalizeStatement(
+      statement,
+      params,
+    )
+
+    return this.connection.any<T>(normalizedStatement, values)
+  }
+
+  private normalizeStatement(
+    statement: string,
+    params?: Record<DatabaseConnection.KeyParam, unknown>,
+  ): {
+    statement: string
+    values: unknown[]
+  } {
     const keys: Record<DatabaseConnection.KeyParam, number> = {}
     const values: unknown[] = []
 
-    const parsedStatement = statement.replace(/(?<!:):\w+/g, (match) => {
+    const normalizedStatement = statement.replace(/(?<!:):\w+/g, (match) => {
       const keyParam = match as DatabaseConnection.KeyParam
 
       if (keys[keyParam] === undefined) {
@@ -29,7 +44,10 @@ export class PostgresAdapter implements DatabaseConnection {
       return `$${keys[keyParam]}`
     })
 
-    return this.connection.any<T>(parsedStatement, values)
+    return {
+      statement: normalizedStatement,
+      values,
+    }
   }
 
   async getStatus() {

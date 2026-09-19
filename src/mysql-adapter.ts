@@ -2,26 +2,44 @@ import { DatabaseConnection } from '@database-connection.ts'
 import mysql, { Pool } from 'mysql2/promise'
 
 export class MysqlAdapter implements DatabaseConnection {
-  private connection: Pool
+  private readonly connection: Pool
 
-  constructor(private databaseURI: string) {
+  constructor(databaseURI: string) {
     this.connection = mysql.createPool(databaseURI)
   }
 
-  async query<T = any>(
+  async query<T = unknown>(
     statement: string,
-    params?: Record<`:${string}`, unknown>,
+    params?: Record<DatabaseConnection.KeyParam, unknown>,
   ): Promise<T[]> {
-    const values: unknown[] = []
-
-    const parsedStatement = statement.replace(/:\w+/g, (match) => {
-      values.push(params?.[match as DatabaseConnection.KeyParam])
-      return '?'
-    })
+    const { statement: parsedStatement, values } = this.prepareStatement(
+      statement,
+      params,
+    )
 
     const [rows] = await this.connection.query(parsedStatement, values)
 
     return rows as T[]
+  }
+
+  private prepareStatement(
+    statement: string,
+    params?: Record<DatabaseConnection.KeyParam, unknown>,
+  ): {
+    statement: string
+    values: unknown[]
+  } {
+    const values: unknown[] = []
+
+    const parsedStatement = statement.replace(/(?<!:):\w+/g, (match) => {
+      values.push(params?.[match as DatabaseConnection.KeyParam])
+      return '?'
+    })
+
+    return {
+      statement: parsedStatement,
+      values,
+    }
   }
 
   async getStatus() {
@@ -29,13 +47,13 @@ export class MysqlAdapter implements DatabaseConnection {
       'SELECT VERSION() AS version',
     )
 
-    const [{ Value: maxConnections }] = await this.query<{ Value: string }>(
-      "SHOW VARIABLES LIKE 'max_connections'",
-    )
+    const [{ Value: maxConnections }] = await this.query<{
+      Value: string
+    }>("SHOW VARIABLES LIKE 'max_connections'")
 
-    const [{ Value: openedConnections }] = await this.query<{ Value: string }>(
-      "SHOW STATUS LIKE 'Threads_connected'",
-    )
+    const [{ Value: openedConnections }] = await this.query<{
+      Value: string
+    }>("SHOW STATUS LIKE 'Threads_connected'")
 
     return {
       version,
@@ -45,6 +63,6 @@ export class MysqlAdapter implements DatabaseConnection {
   }
 
   async close(): Promise<void> {
-    this.connection.end()
+    await this.connection.end()
   }
 }

@@ -27,6 +27,7 @@
   "devDependencies": {
     "@rocketseat/eslint-config": "^2.2.2",
     "@types/async-retry": "^1.4.9",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/express": "^5.0.6",
     "@types/node": "^24.13.3",
     "@types/sinon": "^22.0.0",
@@ -53,6 +54,7 @@
   "dependencies": {
     "@fastify/cors": "^11.3.0",
     "@types/cors": "^2.8.19",
+    "better-sqlite3": "^13.0.3",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "fastify": "^5.12.5",

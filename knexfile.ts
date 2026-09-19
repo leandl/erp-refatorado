@@ -16,6 +16,15 @@ export const connections = {
     connection: process.env.DATABASE_POSTGRES_URL,
     migrations,
   } satisfies Knex.Config,
+
+  sqlite3: {
+    client: 'better-sqlite3',
+    connection: {
+      filename: String(process.env.DATABASE_SQLITE_FILENAME),
+    },
+    useNullAsDefault: true,
+    migrations,
+  } satisfies Knex.Config,
 }
 
-export default connections.postgres
+export default connections.mysql

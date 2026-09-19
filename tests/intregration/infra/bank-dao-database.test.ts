@@ -1,6 +1,6 @@
 import { BankDAO, BankDAODatabase } from '@bank-dao.ts'
 import { DatabaseConnection } from '@database-connection.ts'
-import { PostgresAdapter } from '@postgres-adapter.ts'
+import { MysqlAdapter } from '@mysql-adapter.ts'
 
 import { orchestrator } from '../../orchestrator.ts'
 
@@ -11,7 +11,9 @@ beforeAll(async () => {
   await orchestrator.clearDatabase()
   await orchestrator.runPendingMigrations()
 
-  connection = new PostgresAdapter(String(process.env.DATABASE_POSTGRES_URL))
+  connection = new MysqlAdapter(String(process.env.DATABASE_MYSQL_URL))
+  // connection = new PostgresAdapter(String(process.env.DATABASE_POSTGRES_URL))
+  // connection = new SqliteAdapter(String(process.env.DATABASE_SQLITE_FILENAME))
   bankDAO = new BankDAODatabase(connection)
 })
 

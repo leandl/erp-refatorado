@@ -14,6 +14,10 @@ const databaseByClient = {
     commandHealth: 'docker exec postgres-dev pg_isready --host localhost',
     validate: (_error, stdout) => stdout.search('accepting connections'),
   },
+  'better-sqlite3': {
+    name: 'SQLite3',
+    validate: (_error, _stdout) => true,
+  },
 }
 
 const database = databaseByClient[config.client]
@@ -23,15 +27,27 @@ if (!database) {
 }
 
 function checkDatabase() {
-  exec(database.commandHealth, (error, stdout) => {
-    if (!database.validate(error, stdout)) {
-      process.stdout.write('.')
-      setTimeout(checkDatabase, 500)
-      return
-    }
+  if ('commandHealth' in database) {
+    exec(database.commandHealth, (error, stdout) => {
+      if (!database.validate(error, stdout)) {
+        process.stdout.write('.')
+        setTimeout(checkDatabase, 500)
+        return
+      }
 
-    console.log(`\n🟢 ${database.name} está pronto e aceitando conexões!`)
-  })
+      console.log(`\n🟢 ${database.name} está pronto e aceitando conexões!`)
+    })
+
+    return
+  }
+
+  if (!database.validate()) {
+    process.stdout.write('.')
+    setTimeout(checkDatabase, 500)
+    return
+  }
+
+  console.log(`\n🟢 ${database.name} está pronto e aceitando conexões!`)
 }
 
 process.stdout.write(`\n\n🔴 Aguardando ${database.name} aceitar conexões`)
