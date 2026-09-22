@@ -54,4 +54,18 @@ const getApplicationStatus = new GetApplicationStatus(
 
 new ApplicationStatusRestController(httpRestServer, getApplicationStatus)
 
-httpRestServer.listen(3001)
+httpRestServer.listen(3002)
+
+const gracefullShutdown = async () => {
+  try {
+    await databaseConnection.close()
+    console.log('Application terminated')
+  } catch (error: any) {
+    console.log(
+      `Error on shutdown application: ${error.message}, stack: ${error.stack}`,
+    )
+  }
+}
+
+process.on('SIGTERM', gracefullShutdown)
+process.on('SIGINT', gracefullShutdown)
