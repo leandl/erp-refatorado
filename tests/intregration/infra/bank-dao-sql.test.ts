@@ -1,7 +1,7 @@
-import { BankDAO } from '@bank-dao.ts'
-import { BankDAOSQL } from '@bank-dao-sql.ts'
-import { DatabaseConnection } from '@database-connection.ts'
-import { MysqlAdapter } from '@mysql-adapter.ts'
+import { BankDAO } from '@adapters/database/DAOs/bank-dao.ts'
+import { BankDAOSQL } from '@adapters/database/DAOs/bank-dao-sql.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 
 import { orchestrator } from '../../orchestrator.ts'
 

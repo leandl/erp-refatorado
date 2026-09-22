@@ -1,5 +1,5 @@
-import { BankDAO } from '@bank-dao.ts'
-import { DatabaseConnection } from '@database-connection.ts'
+import { BankDAO } from '@adapters/database/DAOs/bank-dao.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
 
 export class BankDAOSQL implements BankDAO {
   constructor(private databaseConnection: DatabaseConnection) {}

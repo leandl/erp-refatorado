@@ -1,7 +1,7 @@
-import { ApplicationError } from '@application-error.ts'
-import { BankRepository } from '@bank-repository.ts'
-import { CreateBank } from '@create-bank.ts'
-import { DomainError } from '@domain-error.ts'
+import { ApplicationError } from '@application/errors/application-error.ts'
+import { BankRepository } from '@application/repositories/bank-repository.ts'
+import { CreateBank } from '@application/usecases/create-bank.ts'
+import { DomainError } from '@domain/errors/domain-error.ts'
 
 import { BankRepositoryFake } from '../../mocks/bank-repository-fake.ts'
 

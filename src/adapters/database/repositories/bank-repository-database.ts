@@ -1,6 +1,6 @@
-import { Bank } from '@bank.ts'
-import { BankDAO } from '@bank-dao.ts'
-import { BankRepository } from '@bank-repository.ts'
+import { BankDAO } from '@adapters/database/DAOs/bank-dao.ts'
+import { BankRepository } from '@application/repositories/bank-repository.ts'
+import { Bank } from '@domain/entities/bank.ts'
 
 export class BankRepositoryDatabase implements BankRepository {
   constructor(private bankDAO: BankDAO) {}

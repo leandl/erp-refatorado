@@ -1,5 +1,5 @@
-import { Bank } from '@bank.ts'
-import { DomainError } from '@domain-error.ts'
+import { Bank } from '@domain/entities/bank.ts'
+import { DomainError } from '@domain/errors/domain-error.ts'
 
 const makeInput = <T extends Bank.CreateParams | Bank.RestoreParams>(
   overrides: Partial<T> = {},

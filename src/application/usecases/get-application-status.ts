@@ -1,5 +1,5 @@
-import { DatabaseConnection } from '@database-connection.ts'
-import { UseCase } from '@use-case.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { UseCase } from '@application/usecases/use-case.ts'
 
 export class GetApplicationStatus implements UseCase<
   GetApplicationStatus.Input,

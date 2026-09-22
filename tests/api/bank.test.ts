@@ -1,6 +1,6 @@
-import { FetchAdapter } from '@fetch-adapter.ts'
-import { HttpClient } from '@http-client.ts'
-import { HttpRestServer } from '@http-rest-server.ts'
+import { HttpClient } from '@adapters/http/http-client.ts'
+import { HttpRestServer } from '@adapters/http/http-rest-server.ts'
+import { FetchAdapter } from '@external/http/fetch-adapter.ts'
 import { webserver } from '@infra/webserver.ts'
 
 import { orchestrator } from '../orchestrator.ts'

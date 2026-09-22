@@ -1,4 +1,4 @@
-import { HttpClient } from '@http-client.ts'
+import { HttpClient } from '@adapters/http/http-client.ts'
 import axios from 'axios'
 
 axios.defaults.validateStatus = () => true

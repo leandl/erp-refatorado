@@ -1,5 +1,5 @@
-import { DatabaseConnection } from '@database-connection.ts'
-import { MysqlAdapter } from '@mysql-adapter.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 import { afterEach, beforeEach, expect, test } from 'vitest'
 
 let databaseConnection: DatabaseConnection

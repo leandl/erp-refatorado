@@ -1,8 +1,8 @@
-import { Bank } from '@bank.ts'
-import { BankRepository } from '@bank-repository.ts'
-import { BankRepositorySQL } from '@bank-repository-sql.ts'
-import { DatabaseConnection } from '@database-connection.ts'
-import { MysqlAdapter } from '@mysql-adapter.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { BankRepositorySQL } from '@adapters/database/repositories/bank-repository-sql.ts'
+import { BankRepository } from '@application/repositories/bank-repository.ts'
+import { Bank } from '@domain/entities/bank.ts'
+import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 
 import { orchestrator } from '../../orchestrator.ts'
 

@@ -1,4 +1,4 @@
-import { BankDAO } from '@bank-dao.ts'
+import { BankDAO } from '@adapters/database/DAOs/bank-dao.ts'
 
 import { DatabaseTableMemory } from './database-table-memory.ts'
 

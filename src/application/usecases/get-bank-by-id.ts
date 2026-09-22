@@ -1,6 +1,7 @@
-import { BankRepository } from '@bank-repository.ts'
-import { NotFoundError } from '@not-found-error.ts'
-import { UseCase } from '@use-case.ts'
+import { NotFoundError } from '@application/errors/not-found-error.ts'
+import { BankRepository } from '@application/repositories/bank-repository.ts'
+
+import { UseCase } from './use-case.ts'
 
 export class GetBankById implements UseCase<
   GetBankById.Input,

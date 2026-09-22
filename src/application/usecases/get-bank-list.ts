@@ -1,5 +1,6 @@
-import { BankRepository } from '@bank-repository.ts'
-import { UseCase } from '@use-case.ts'
+import { BankRepository } from '@application/repositories/bank-repository.ts'
+
+import { UseCase } from './use-case.ts'
 
 export class GetBankList implements UseCase<
   GetBankList.Input,

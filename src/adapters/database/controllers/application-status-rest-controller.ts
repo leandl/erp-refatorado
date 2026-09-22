@@ -1,5 +1,5 @@
-import { GetApplicationStatus } from '@get-application-status.ts'
-import { HttpRestServer } from '@http-rest-server.ts'
+import { HttpRestServer } from '@adapters/http/http-rest-server.ts'
+import { GetApplicationStatus } from '@application/usecases/get-application-status.ts'
 
 export class ApplicationStatusRestController {
   constructor(

@@ -1,4 +1,4 @@
-import { DatabaseConnection } from '@database-connection.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
 import BetterSQLite, { Database } from 'better-sqlite3'
 
 export class SqliteAdapter implements DatabaseConnection {

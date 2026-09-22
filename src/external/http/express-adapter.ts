@@ -1,5 +1,5 @@
-import { ErrorMapper } from '@error-mapper.ts'
-import { HttpRestServer } from '@http-rest-server.ts'
+import { ErrorMapper } from '@adapters/error-mapper.ts'
+import { HttpRestServer } from '@adapters/http/http-rest-server.ts'
 import cors from 'cors'
 import express, { Express, Request, Response } from 'express'
 

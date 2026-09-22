@@ -1,4 +1,4 @@
-import { HttpClient } from '@http-client.ts'
+import { HttpClient } from '@adapters/http/http-client.ts'
 
 export class FetchAdapter implements HttpClient {
   async get(url: string): Promise<HttpClient.Response> {

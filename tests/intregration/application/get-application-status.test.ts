@@ -1,5 +1,5 @@
-import { DatabaseConnection } from '@database-connection.ts'
-import { GetApplicationStatus } from '@get-application-status.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { GetApplicationStatus } from '@application/usecases/get-application-status.ts'
 
 let databaseConnection: DatabaseConnection
 let sut: GetApplicationStatus

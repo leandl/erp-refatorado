@@ -1,9 +1,12 @@
-import { BankRestController, HttpRestServer } from '@bank-rest-controller.ts'
-import { CreateBank } from '@create-bank.ts'
-import { GetBankById } from '@get-bank-by-id.ts'
-import { GetBankList } from '@get-bank-list.ts'
-import { RemoveBank } from '@remove-bank.ts'
-import { UpdateBank } from '@update-bank.ts'
+import {
+  BankRestController,
+  HttpRestServer,
+} from '@adapters/database/controllers/bank-rest-controller.ts'
+import { CreateBank } from '@application/usecases/create-bank.ts'
+import { GetBankById } from '@application/usecases/get-bank-by-id.ts'
+import { GetBankList } from '@application/usecases/get-bank-list.ts'
+import { RemoveBank } from '@application/usecases/remove-bank.ts'
+import { UpdateBank } from '@application/usecases/update-bank.ts'
 import Sinon from 'sinon'
 
 test('Should register bank routes on the HTTP server', () => {

@@ -1,8 +1,8 @@
-import { ApplicationError } from '@application-error.ts'
-import { DomainError } from '@domain-error.ts'
-import { ErrorMapper } from '@error-mapper.ts'
-import { HttpRestServer } from '@http-rest-server.ts'
-import { NotFoundError } from '@not-found-error.ts'
+import { ErrorMapper } from '@adapters/error-mapper.ts'
+import { HttpRestServer } from '@adapters/http/http-rest-server.ts'
+import { ApplicationError } from '@application/errors/application-error.ts'
+import { NotFoundError } from '@application/errors/not-found-error.ts'
+import { DomainError } from '@domain/errors/domain-error.ts'
 
 test('Should return 404 when a NotFoundError is thrown', async () => {
   const error = new NotFoundError('Something went wrong - NotFound')

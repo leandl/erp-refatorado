@@ -1,5 +1,5 @@
-import { DatabaseConnection } from '@database-connection.ts'
-import { SqliteAdapter } from '@sqlite-adapter.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { SqliteAdapter } from '@external/database/sqlite-adapter.ts'
 import { afterEach, beforeEach, expect, test } from 'vitest'
 
 let databaseConnection: DatabaseConnection

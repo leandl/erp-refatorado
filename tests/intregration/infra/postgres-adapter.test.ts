@@ -1,5 +1,5 @@
-import { DatabaseConnection } from '@database-connection.ts'
-import { PostgresAdapter } from '@postgres-adapter.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { PostgresAdapter } from '@external/database/postgres-adapter.ts'
 import { afterEach, beforeEach, expect, test } from 'vitest'
 
 let databaseConnection: DatabaseConnection

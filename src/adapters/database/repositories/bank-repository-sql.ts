@@ -1,6 +1,6 @@
-import { Bank } from '@bank.ts'
-import { BankRepository } from '@bank-repository.ts'
-import { DatabaseConnection } from '@database-connection.ts'
+import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { BankRepository } from '@application/repositories/bank-repository.ts'
+import { Bank } from '@domain/entities/bank.ts'
 
 export class BankRepositorySQL implements BankRepository {
   constructor(private databaseConnection: DatabaseConnection) {}

@@ -1,4 +1,4 @@
-import { validateBankCode } from '@validate-bank-code.ts'
+import { validateBankCode } from '@domain/entities/validate-bank-code.ts'
 
 test.each([
   '',

@@ -1,7 +1,7 @@
-import { Bank } from '@bank.ts'
-import { BankRepository } from '@bank-repository.ts'
-import { GetBankById } from '@get-bank-by-id.ts'
-import { NotFoundError } from '@not-found-error.ts'
+import { NotFoundError } from '@application/errors/not-found-error.ts'
+import { BankRepository } from '@application/repositories/bank-repository.ts'
+import { GetBankById } from '@application/usecases/get-bank-by-id.ts'
+import { Bank } from '@domain/entities/bank.ts'
 
 import { BankRepositoryFake } from '../../mocks/bank-repository-fake.ts'
 

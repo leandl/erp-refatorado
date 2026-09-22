@@ -1,7 +1,7 @@
-import { Bank } from '@bank.ts'
-import { BankDAO } from '@bank-dao.ts'
-import { BankRepository } from '@bank-repository.ts'
-import { BankRepositoryDatabase } from '@bank-repository-database.ts'
+import { BankDAO } from '@adapters/database/DAOs/bank-dao.ts'
+import { BankRepositoryDatabase } from '@adapters/database/repositories/bank-repository-database.ts'
+import { BankRepository } from '@application/repositories/bank-repository.ts'
+import { Bank } from '@domain/entities/bank.ts'
 
 import { BankDAOFake } from '../../mocks/bank-dao-fake.ts'
 
