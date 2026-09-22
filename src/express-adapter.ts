@@ -1,5 +1,5 @@
-import { HttpRestServer } from '@bank-rest-controller.ts'
 import { ErrorMapper } from '@error-mapper.ts'
+import { HttpRestServer } from '@http-rest-server.ts'
 import cors from 'cors'
 import express, { Express, Request, Response } from 'express'
 

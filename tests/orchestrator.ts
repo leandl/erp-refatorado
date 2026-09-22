@@ -1,5 +1,5 @@
-import { HttpRestServer } from '@bank-rest-controller.ts'
 import { FetchAdapter } from '@fetch-adapter.ts'
+import { HttpRestServer } from '@http-rest-server.ts'
 import { migrator } from '@infra/migrator.ts'
 import { webserver } from '@infra/webserver.ts'
 import retry from 'async-retry'

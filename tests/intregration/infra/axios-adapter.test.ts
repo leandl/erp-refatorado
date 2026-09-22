@@ -1,5 +1,6 @@
-import { HttpRestServer } from '@bank-rest-controller.ts'
-import { AxiosAdapter, HttpClient } from '@http-client.ts'
+import { AxiosAdapter } from '@axios-adapter.ts'
+import { HttpClient } from '@http-client.ts'
+import { HttpRestServer } from '@http-rest-server.ts'
 import axios from 'axios'
 import nock from 'nock'
 import Sinon from 'sinon'

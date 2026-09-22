@@ -1,6 +1,6 @@
-import { HttpRestServer } from '@bank-rest-controller.ts'
 import { FetchAdapter } from '@fetch-adapter.ts'
 import { HttpClient } from '@http-client.ts'
+import { HttpRestServer } from '@http-rest-server.ts'
 import { webserver } from '@infra/webserver.ts'
 
 import { orchestrator } from '../orchestrator.ts'

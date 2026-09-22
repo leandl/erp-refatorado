@@ -1,5 +1,5 @@
-import { HttpRestServer } from '@bank-rest-controller.ts'
 import { GetApplicationStatus } from '@get-application-status.ts'
+import { HttpRestServer } from '@http-rest-server.ts'
 
 export class ApplicationStatusRestController {
   constructor(

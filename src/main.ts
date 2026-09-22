@@ -1,5 +1,5 @@
 import { ApplicationStatusRestController } from '@application-status-rest-controller.ts'
-import { BankDAOSQL } from '@bank-dao.ts'
+import { BankDAOSQL } from '@bank-dao-sql.ts'
 import { BankRepositoryDatabase } from '@bank-repository-database.ts'
 import { BankRestController } from '@bank-rest-controller.ts'
 import { CreateBank } from '@create-bank.ts'

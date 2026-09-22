@@ -1,7 +1,7 @@
 import { ApplicationError } from '@application-error.ts'
-import { HttpRestServer } from '@bank-rest-controller.ts'
 import { DomainError } from '@domain-error.ts'
 import { ErrorMapper } from '@error-mapper.ts'
+import { HttpRestServer } from '@http-rest-server.ts'
 import { NotFoundError } from '@not-found-error.ts'
 
 test('Should return 404 when a NotFoundError is thrown', async () => {
