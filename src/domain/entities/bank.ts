@@ -1,9 +1,11 @@
+import { BankRepository } from '@application/repositories/bank-repository.ts'
 import { validateBankCode } from '@domain/entities/validate-bank-code.ts'
 import { DomainError } from '@domain/errors/domain-error.ts'
 
 import { validateBankName } from './validate-bank-name.ts'
 
 export class Bank {
+  repository!: BankRepository
   private constructor(
     private bankId: number,
     private name: string,
