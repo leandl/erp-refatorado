@@ -1,21 +1,26 @@
 import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { ApplicationDependenciesRepository as ApplicationDependenciesRepositoryDatabase } from '@adapters/database/repositories/application-dependencies-repository.ts'
+import { ApplicationDependenciesRepository } from '@application/repositories/application-dependencies-repository.ts'
 import { GetApplicationStatus } from '@application/usecases/get-application-status.ts'
 
 let databaseConnection: DatabaseConnection
+let applicationDependenciesRepository: ApplicationDependenciesRepository
 let sut: GetApplicationStatus
 
 beforeEach(() => {
   databaseConnection = {
     query: async () => [],
     close: async () => {},
-    getStatus: async () => ({
+    getStatus: async (): Promise<DatabaseConnection.Status> => ({
       version: 'MariaDB 12.3.0',
       maxConnections: 151,
       openedConnections: 5,
     }),
-  }
+  } as DatabaseConnection
 
-  sut = new GetApplicationStatus(databaseConnection)
+  applicationDependenciesRepository =
+    new ApplicationDependenciesRepositoryDatabase(databaseConnection)
+  sut = new GetApplicationStatus(applicationDependenciesRepository)
 })
 
 test('Should return application status', async () => {

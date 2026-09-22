@@ -1,7 +1,7 @@
 import { ErrorMapper } from '@adapters/error-mapper.ts'
 import { HttpRestServer } from '@adapters/http/http-rest-server.ts'
 import cors from 'cors'
-import express, { Express, Request, Response } from 'express'
+import express, { Express, json, Request, Response } from 'express'
 
 const expressMethods: Record<
   HttpRestServer.AcceptedMethods,
@@ -19,7 +19,7 @@ export class ExpressAdapter implements HttpRestServer {
   constructor() {
     this.server = express()
 
-    this.server.use(express.json())
+    this.server.use(json())
     this.server.use(cors())
   }
 

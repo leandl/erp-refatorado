@@ -1,6 +1,7 @@
 import { ApplicationStatusRestController } from '@adapters/database/controllers/application-status-rest-controller.ts'
 import { BankRestController } from '@adapters/database/controllers/bank-rest-controller.ts'
 import { BankDAOSQL } from '@adapters/database/DAOs/bank-dao-sql.ts'
+import { ApplicationDependenciesRepository } from '@adapters/database/repositories/application-dependencies-repository.ts'
 import { BankRepositoryDatabase } from '@adapters/database/repositories/bank-repository-database.ts'
 import { CreateBank } from '@application/usecases/create-bank.ts'
 import { GetApplicationStatus } from '@application/usecases/get-application-status.ts'
@@ -43,7 +44,13 @@ new BankRestController(
   removeBank,
 )
 
-const getApplicationStatus = new GetApplicationStatus(databaseConnection)
+const applicationDependenciesRepository = new ApplicationDependenciesRepository(
+  databaseConnection,
+)
+
+const getApplicationStatus = new GetApplicationStatus(
+  applicationDependenciesRepository,
+)
 
 new ApplicationStatusRestController(httpRestServer, getApplicationStatus)
 

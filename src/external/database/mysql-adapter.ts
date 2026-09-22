@@ -1,11 +1,11 @@
 import { DatabaseConnection } from '@adapters/database/database-connection.ts'
-import mysql, { Pool } from 'mysql2/promise'
+import { createPool, Pool } from 'mysql2/promise'
 
 export class MysqlAdapter implements DatabaseConnection {
   private readonly connection: Pool
 
   constructor(databaseURI: string) {
-    this.connection = mysql.createPool(databaseURI)
+    this.connection = createPool(databaseURI)
   }
 
   async query<T = unknown>(

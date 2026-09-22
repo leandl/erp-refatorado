@@ -1,7 +1,7 @@
 import type { Knex } from 'knex'
 
 const migrations = {
-  directory: './src/adapters/database/migrations',
+  directory: './src/external/database/migrations',
 }
 
 export const connections = {

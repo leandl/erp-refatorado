@@ -1,22 +1,25 @@
-import { DatabaseConnection } from '@adapters/database/database-connection.ts'
+import { ApplicationDependenciesRepository } from '@application/repositories/application-dependencies-repository.ts'
 import { UseCase } from '@application/usecases/use-case.ts'
 
 export class GetApplicationStatus implements UseCase<
   GetApplicationStatus.Input,
   GetApplicationStatus.Output
 > {
-  constructor(private databaseConnection: DatabaseConnection) {}
+  constructor(
+    private applicationDependenciesRepository: ApplicationDependenciesRepository,
+  ) {}
 
   async execute(): Promise<GetApplicationStatus.Output> {
-    const databaseStatus = await this.databaseConnection.getStatus()
+    const dependenciesStatus =
+      await this.applicationDependenciesRepository.getStatus()
 
     return {
       updated_at: new Date().toISOString(),
       dependencies: {
         database: {
-          version: databaseStatus.version,
-          max_connections: databaseStatus.maxConnections,
-          opened_connections: databaseStatus.openedConnections,
+          max_connections: dependenciesStatus.database.maxConnections,
+          opened_connections: dependenciesStatus.database.openedConnections,
+          version: dependenciesStatus.database.version,
         },
       },
     }
