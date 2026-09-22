@@ -32,11 +32,11 @@ export namespace BankDAO {
   }
 }
 
-export class BankDAODatabase implements BankDAO {
+export class BankDAOSQL implements BankDAO {
   constructor(private databaseConnection: DatabaseConnection) {}
 
   async save(dto: BankDAO.SaveDTO): Promise<number> {
-    const [row] = await this.databaseConnection.query<BankDAODatabase.BankRow>(
+    const [row] = await this.databaseConnection.query<BankDAOSQL.BankRow>(
       'INSERT INTO bank(code, name, url) VALUES(:code, :name, :url) RETURNING *',
       {
         ':code': dto.code,
@@ -49,13 +49,13 @@ export class BankDAODatabase implements BankDAO {
   }
 
   async list(): Promise<BankDAO.BankDTO[]> {
-    return await this.databaseConnection.query<BankDAODatabase.BankRow>(
+    return await this.databaseConnection.query<BankDAOSQL.BankRow>(
       'SELECT * FROM bank',
     )
   }
 
   async getById(bankId: number): Promise<BankDAO.BankDTO | undefined> {
-    const [row] = await this.databaseConnection.query<BankDAODatabase.BankRow>(
+    const [row] = await this.databaseConnection.query<BankDAOSQL.BankRow>(
       'SELECT * FROM bank WHERE bank_id = :bank_id',
       { ':bank_id': bankId },
     )
@@ -64,7 +64,7 @@ export class BankDAODatabase implements BankDAO {
   }
 
   async getByCode(code: string): Promise<BankDAO.BankDTO | undefined> {
-    const [row] = await this.databaseConnection.query<BankDAODatabase.BankRow>(
+    const [row] = await this.databaseConnection.query<BankDAOSQL.BankRow>(
       'SELECT * FROM bank WHERE code = :code',
       { ':code': code },
     )
@@ -73,7 +73,7 @@ export class BankDAODatabase implements BankDAO {
   }
 
   async getByName(name: string): Promise<BankDAO.BankDTO | undefined> {
-    const [row] = await this.databaseConnection.query<BankDAODatabase.BankRow>(
+    const [row] = await this.databaseConnection.query<BankDAOSQL.BankRow>(
       'SELECT * FROM bank WHERE name = :name',
       { ':name': name },
     )
@@ -103,7 +103,7 @@ export class BankDAODatabase implements BankDAO {
   }
 }
 
-namespace BankDAODatabase {
+namespace BankDAOSQL {
   export type BankRow = {
     bank_id: number
     name: string

@@ -1,5 +1,5 @@
 import { ApplicationStatusRestController } from '@application-status-rest-controller.ts'
-import { BankDAODatabase } from '@bank-dao.ts'
+import { BankDAOSQL } from '@bank-dao.ts'
 import { BankRepositoryDatabase } from '@bank-repository-database.ts'
 import { BankRestController } from '@bank-rest-controller.ts'
 import { CreateBank } from '@create-bank.ts'
@@ -21,7 +21,7 @@ const databaseConnection = new MysqlAdapter(
 //   String(process.env.DATABASE_SQLITE_FILENAME),
 // )
 
-const bankDAO = new BankDAODatabase(databaseConnection)
+const bankDAO = new BankDAOSQL(databaseConnection)
 const bankRepository = new BankRepositoryDatabase(bankDAO)
 // const bankRepository = new BankRepositorySQL(databaseConnection)
 
