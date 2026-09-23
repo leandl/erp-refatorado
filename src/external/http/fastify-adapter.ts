@@ -54,4 +54,8 @@ export class FastifyAdapter implements HttpRestServer {
       }
     })
   }
+
+  async close(): Promise<void> {
+    await this.server?.close()
+  }
 }

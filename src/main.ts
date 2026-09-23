@@ -10,6 +10,7 @@ import { GetBankList } from '@application/usecases/get-bank-list.ts'
 import { RemoveBank } from '@application/usecases/remove-bank.ts'
 import { UpdateBank } from '@application/usecases/update-bank.ts'
 import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
+import { GracefulShutdown } from '@external/graceful-shutdown.ts'
 import { ExpressAdapter } from '@external/http/express-adapter.ts'
 
 const databaseConnection = new MysqlAdapter(
@@ -54,18 +55,11 @@ const getApplicationStatus = new GetApplicationStatus(
 
 new ApplicationStatusRestController(httpRestServer, getApplicationStatus)
 
-httpRestServer.listen(3002)
+httpRestServer.listen(3001)
 
-const gracefullShutdown = async () => {
-  try {
-    await databaseConnection.close()
-    console.log('Application terminated')
-  } catch (error: any) {
-    console.log(
-      `Error on shutdown application: ${error.message}, stack: ${error.stack}`,
-    )
-  }
-}
+const gracefulShutdown = new GracefulShutdown([
+  () => httpRestServer.close(),
+  () => databaseConnection.close(),
+])
 
-process.on('SIGTERM', gracefullShutdown)
-process.on('SIGINT', gracefullShutdown)
+gracefulShutdown.register()
