@@ -8,8 +8,8 @@ import { GetBankById } from '@application/usecases/get-bank-by-id.ts'
 import { GetBankList } from '@application/usecases/get-bank-list.ts'
 import { RemoveBank } from '@application/usecases/remove-bank.ts'
 import { UpdateBank } from '@application/usecases/update-bank.ts'
-import { BankDAOTypeORM } from '@external/database/DAOs/typeorm/bank-dao-typeorm.ts'
-import { typeORMDataSourceFactory } from '@external/database/DAOs/typeorm/factory.ts'
+import { BankDAOPrisma } from '@external/database/DAOs/prisma/bank-dao-prisma.ts'
+import { prismaDataSourceFactory } from '@external/database/DAOs/prisma/factory.ts'
 import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 import { GracefulShutdown } from '@external/graceful-shutdown.ts'
 import { ExpressAdapter } from '@external/http/express-adapter.ts'
@@ -23,15 +23,20 @@ const databaseConnection = new MysqlAdapter(
 // const databaseConnection = new SqliteAdapter(
 //   String(process.env.DATABASE_SQLITE_FILENAME),
 // )
+// const bankRepository = new BankRepositorySQL(databaseConnection)
 
-const dataSource = await typeORMDataSourceFactory(
+// const dataSource = await typeORMDataSourceFactory(
+//   String(process.env.DATABASE_MYSQL_URL),
+// )
+// const bankDAO = new BankDAOTypeORM(dataSource)
+
+const dataSource = await prismaDataSourceFactory(
   String(process.env.DATABASE_MYSQL_URL),
 )
-const bankDAO = new BankDAOTypeORM(dataSource)
+const bankDAO = new BankDAOPrisma(dataSource)
 // const bankDAO = new BankDAOSQL(databaseConnection)
 
 const bankRepository = new BankRepositoryDatabase(bankDAO)
-// const bankRepository = new BankRepositorySQL(databaseConnection)
 
 const httpRestServer = new ExpressAdapter()
 // const httpRestServer = new FastifyAdapter()
@@ -66,7 +71,7 @@ httpRestServer.listen(3001)
 const gracefulShutdown = new GracefulShutdown([
   () => httpRestServer.close(),
   () => databaseConnection.close(),
-  () => dataSource.destroy(),
+  () => dataSource.disconnect(),
 ])
 
 gracefulShutdown.register()

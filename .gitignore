@@ -2,3 +2,4 @@ node_modules/
 dist/
 .env*
 *.sqlite
+src/external/database/DAOs/prisma/generated

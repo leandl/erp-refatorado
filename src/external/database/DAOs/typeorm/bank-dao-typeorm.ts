@@ -1,13 +1,16 @@
 import { BankDAO } from '@adapters/database/DAOs/bank-dao.ts'
-import { DataSource, Repository } from 'typeorm'
+import { Repository } from 'typeorm'
 
 import { BankTypeORMPersistenceModel } from './bank-typeorm-persistence-model.ts'
+import { DataSourceTypeORM } from './data-source-typeorm.ts'
 
 export class BankDAOTypeORM implements BankDAO {
   private repository: Repository<BankTypeORMPersistenceModel>
 
-  constructor(dataSource: DataSource) {
-    this.repository = dataSource.getRepository(BankTypeORMPersistenceModel)
+  constructor(dataSource: DataSourceTypeORM) {
+    this.repository = dataSource
+      .getSource()
+      .getRepository(BankTypeORMPersistenceModel)
   }
 
   async save(dto: BankDAO.SaveDTO): Promise<number> {

@@ -1,6 +1,6 @@
 import { BankDAO } from '@adapters/database/DAOs/bank-dao.ts'
-import { BankDAOTypeORM } from '@external/database/DAOs/typeorm/bank-dao-typeorm.ts'
-import { typeORMDataSourceFactory } from '@external/database/DAOs/typeorm/factory.ts'
+import { BankDAOPrisma } from '@external/database/DAOs/prisma/bank-dao-prisma.ts'
+import { prismaDataSourceFactory } from '@external/database/DAOs/prisma/factory.ts'
 import { DataSource } from '@external/database/data-source.ts'
 
 import { orchestrator } from '../../orchestrator.ts'
@@ -12,14 +12,14 @@ beforeAll(async () => {
   await orchestrator.clearDatabase()
   await orchestrator.runPendingMigrations()
 
-  dataSource = await typeORMDataSourceFactory(
+  dataSource = await prismaDataSourceFactory(
     String(process.env.DATABASE_MYSQL_URL),
   )
-  bankDAO = new BankDAOTypeORM(dataSource)
+  bankDAO = new BankDAOPrisma(dataSource)
 })
 
 afterAll(async () => {
-  await dataSource.disconnect()
+  await dataSource?.disconnect()
 })
 
 test('Should create, retrieve, update, list, and remove a bank', async () => {
