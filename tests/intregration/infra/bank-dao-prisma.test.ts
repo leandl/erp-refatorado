@@ -1,12 +1,12 @@
 import { BankDAO } from '@adapters/database/DAOs/bank-dao.ts'
 import { BankDAOPrisma } from '@external/database/DAOs/prisma/bank-dao-prisma.ts'
+import { DataSourcePrisma } from '@external/database/DAOs/prisma/data-source-prisma.ts'
 import { prismaDataSourceFactory } from '@external/database/DAOs/prisma/factory.ts'
-import { DataSource } from '@external/database/data-source.ts'
 
 import { orchestrator } from '../../orchestrator.ts'
 
 let bankDAO: BankDAO
-let dataSource: DataSource<any>
+let dataSource: DataSourcePrisma
 
 beforeAll(async () => {
   await orchestrator.clearDatabase()

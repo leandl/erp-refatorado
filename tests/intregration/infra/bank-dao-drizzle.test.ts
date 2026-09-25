@@ -1,21 +1,21 @@
 import { BankDAO } from '@adapters/database/DAOs/bank-dao.ts'
-import { BankDAOTypeORM } from '@external/database/DAOs/typeorm/bank-dao-typeorm.ts'
-import { DataSourceTypeORM } from '@external/database/DAOs/typeorm/data-source-typeorm.ts'
-import { typeORMDataSourceFactory } from '@external/database/DAOs/typeorm/factory.ts'
+import { BankDAODrizzle } from '@external/database/DAOs/drizzle/bank-dao-drizzle.ts'
+import { DataSourceDrizzle } from '@external/database/DAOs/drizzle/data-source-drizzle.ts'
+import { drizzleDataSourceFactory } from '@external/database/DAOs/drizzle/factory.ts'
 
 import { orchestrator } from '../../orchestrator.ts'
 
 let bankDAO: BankDAO
-let dataSource: DataSourceTypeORM
+let dataSource: DataSourceDrizzle
 
 beforeAll(async () => {
   await orchestrator.clearDatabase()
   await orchestrator.runPendingMigrations()
 
-  dataSource = await typeORMDataSourceFactory(
+  dataSource = await drizzleDataSourceFactory(
     String(process.env.DATABASE_MYSQL_URL),
   )
-  bankDAO = new BankDAOTypeORM(dataSource)
+  bankDAO = new BankDAODrizzle(dataSource)
 })
 
 afterAll(async () => {
