@@ -9,6 +9,8 @@ import { GetBankById } from '@application/usecases/get-bank-by-id.ts'
 import { GetBankList } from '@application/usecases/get-bank-list.ts'
 import { RemoveBank } from '@application/usecases/remove-bank.ts'
 import { UpdateBank } from '@application/usecases/update-bank.ts'
+import { BankDAOMongo } from '@external/database/DAOs/mongo/bank-dao-mongo.ts'
+import { mongoDataSourceFactory } from '@external/database/DAOs/mongo/factory.ts'
 import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 import { GracefulShutdown } from '@external/graceful-shutdown.ts'
 import { ExpressAdapter } from '@external/http/express-adapter.ts'
@@ -23,16 +25,20 @@ const databaseConnection = new MysqlAdapter(
 //   String(process.env.DATABASE_SQLITE_FILENAME),
 // )
 
-// const dataSource = await drizzleDataSourceFactory(
-//   String(process.env.DATABASE_MYSQL_URL),
+// const dataSource = await mongoDataSourceFactory(
+//   String(process.env.DATABASE_MONGO_URL),
 // )
-// const dataSource = await typeORMDataSourceFactory(
+// const dataSource = await drizzleDataSourceFactory(
 //   String(process.env.DATABASE_MYSQL_URL),
 // )
 // const dataSource = await prismaDataSourceFactory(
 //   String(process.env.DATABASE_MYSQL_URL),
 // )
+// const dataSource = await typeORMDataSourceFactory(
+//   String(process.env.DATABASE_MYSQL_URL),
+// )
 
+// const bankDAO = new BankDAOMongo(dataSource)
 // const bankDAO = new BankDAODrizzle(dataSource)
 // const bankDAO = new BankDAOPrisma(dataSource)
 // const bankDAO = new BankDAOTypeORM(dataSource)
