@@ -15,13 +15,13 @@ const expressMethods: Record<
 }
 
 export class ExpressAdapter implements HttpRestServer {
-  private server: Express
+  private app: Express
   private serverInstance?: Server
   constructor() {
-    this.server = express()
+    this.app = express()
 
-    this.server.use(json())
-    this.server.use(cors())
+    this.app.use(json())
+    this.app.use(cors())
   }
 
   register(
@@ -33,7 +33,7 @@ export class ExpressAdapter implements HttpRestServer {
   ): void {
     const methodExpress = expressMethods[method]
 
-    this.server[methodExpress](
+    this.app[methodExpress](
       url,
       async (expressRequest: Request, expressResponse: Response) => {
         try {
@@ -56,7 +56,9 @@ export class ExpressAdapter implements HttpRestServer {
   }
 
   listen(port: number): void {
-    this.serverInstance = this.server.listen(port, (err) => {
+    if (this.serverInstance) return
+
+    this.serverInstance = this.app.listen(port, (err) => {
       if (!err) {
         console.log(`Server running with express at http://localhost:${port}`)
       }

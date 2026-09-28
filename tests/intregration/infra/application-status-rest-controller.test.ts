@@ -1,5 +1,5 @@
 import { ApplicationStatusRestController } from '@adapters/database/controllers/application-status-rest-controller.ts'
-import { HttpRestServer } from '@adapters/database/controllers/bank-rest-controller.ts'
+import { HttpRestServer } from '@adapters/http/http-rest-server.ts'
 import { GetApplicationStatus } from '@application/usecases/get-application-status.ts'
 import Sinon from 'sinon'
 
@@ -7,6 +7,7 @@ test('Should register application status route on the HTTP server', () => {
   const httpRestServer: HttpRestServer = {
     listen() {},
     register() {},
+    async close() {},
   }
 
   const registerSpy = Sinon.spy(httpRestServer, 'register')

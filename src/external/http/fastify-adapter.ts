@@ -4,11 +4,11 @@ import fastifyCors from '@fastify/cors'
 import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 export class FastifyAdapter implements HttpRestServer {
-  private server: FastifyInstance
+  private app: FastifyInstance
 
   constructor() {
-    this.server = Fastify()
-    this.server.register(fastifyCors, {
+    this.app = Fastify()
+    this.app.register(fastifyCors, {
       origin: true,
       methods: [...HttpRestServer.AcceptedMethodsList],
     })
@@ -21,7 +21,7 @@ export class FastifyAdapter implements HttpRestServer {
       request: HttpRestServer.Request,
     ) => Promise<HttpRestServer.Response>,
   ): void {
-    this.server.route({
+    this.app.route({
       method,
       url,
       handler: async (
@@ -48,7 +48,7 @@ export class FastifyAdapter implements HttpRestServer {
   }
 
   listen(port: number): void {
-    this.server.listen({ port }, function (err) {
+    this.app.listen({ port }, function (err) {
       if (!err) {
         console.log(`Server running with fastify at http://localhost:${port}`)
       }
@@ -56,6 +56,6 @@ export class FastifyAdapter implements HttpRestServer {
   }
 
   async close(): Promise<void> {
-    await this.server?.close()
+    await this.app?.close()
   }
 }

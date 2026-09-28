@@ -9,8 +9,6 @@ import { GetBankById } from '@application/usecases/get-bank-by-id.ts'
 import { GetBankList } from '@application/usecases/get-bank-list.ts'
 import { RemoveBank } from '@application/usecases/remove-bank.ts'
 import { UpdateBank } from '@application/usecases/update-bank.ts'
-import { BankDAOMongo } from '@external/database/DAOs/mongo/bank-dao-mongo.ts'
-import { mongoDataSourceFactory } from '@external/database/DAOs/mongo/factory.ts'
 import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 import { GracefulShutdown } from '@external/graceful-shutdown.ts'
 import { ExpressAdapter } from '@external/http/express-adapter.ts'
@@ -49,6 +47,7 @@ const bankRepository = new BankRepositoryDatabase(bankDAO)
 
 const httpRestServer = new ExpressAdapter()
 // const httpRestServer = new FastifyAdapter()
+// const httpRestServer = new HonoAdapter()
 
 const getBankList = new GetBankList(bankRepository)
 const getBankById = new GetBankById(bankRepository)

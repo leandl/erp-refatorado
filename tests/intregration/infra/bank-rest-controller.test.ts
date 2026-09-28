@@ -1,7 +1,5 @@
-import {
-  BankRestController,
-  HttpRestServer,
-} from '@adapters/database/controllers/bank-rest-controller.ts'
+import { BankRestController } from '@adapters/database/controllers/bank-rest-controller.ts'
+import { HttpRestServer } from '@adapters/http/http-rest-server.ts'
 import { CreateBank } from '@application/usecases/create-bank.ts'
 import { GetBankById } from '@application/usecases/get-bank-by-id.ts'
 import { GetBankList } from '@application/usecases/get-bank-list.ts'
@@ -13,6 +11,7 @@ test('Should register bank routes on the HTTP server', () => {
   const httpRestServer: HttpRestServer = {
     listen() {},
     register() {},
+    async close() {},
   }
 
   const registerSpy = Sinon.spy(httpRestServer, 'register')
