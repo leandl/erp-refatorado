@@ -1,22 +1,18 @@
-import { validateBankCode } from '@domain/entities/validate-bank-code.ts'
-import { DomainError } from '@domain/errors/domain-error.ts'
-
-import { validateBankName } from './validate-bank-name.ts'
+import { BankCode } from './bank-code.ts'
+import { BankName } from './bank-name.ts'
 
 export class Bank {
+  private code: BankCode
+  private name: BankName
+
   private constructor(
     private bankId: number,
-    private name: string,
-    private code: string,
+    name: string,
+    code: string,
     private url: string,
   ) {
-    if (!validateBankName(name)) {
-      throw new DomainError('Invalid name')
-    }
-
-    if (!validateBankCode(code)) {
-      throw new DomainError('Invalid code')
-    }
+    this.name = new BankName(name)
+    this.code = new BankCode(code)
   }
 
   static create({ name, code, url }: Bank.CreateParams): Bank {
@@ -32,11 +28,11 @@ export class Bank {
   }
 
   getName() {
-    return this.name
+    return this.name.getValue()
   }
 
   getCode() {
-    return this.code
+    return this.code.getValue()
   }
 
   getUrl() {
@@ -52,19 +48,11 @@ export class Bank {
   }
 
   changeName(name: string) {
-    if (!validateBankName(name)) {
-      throw new DomainError('Invalid name')
-    }
-
-    this.name = name
+    this.name = new BankName(name)
   }
 
   changeCode(code: string) {
-    if (!validateBankCode(code)) {
-      throw new DomainError('Invalid code')
-    }
-
-    this.code = code
+    this.code = new BankCode(code)
   }
 }
 
