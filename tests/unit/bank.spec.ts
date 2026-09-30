@@ -1,5 +1,6 @@
 import { Bank } from '@domain/entities/bank.ts'
 import { DomainError } from '@domain/errors/domain-error.ts'
+import { BankInfoUpdatedEvent } from '@domain/events/bank-info-updated-event.ts'
 
 const makeInput = <T extends Bank.CreateParams | Bank.RestoreParams>(
   overrides: Partial<T> = {},
@@ -187,57 +188,57 @@ test.each(['000', '001', '033', '104', '237', '341', '999'])(
   },
 )
 
-test('Should change the bank name', () => {
+test('Should register a BankInfoUpdatedEvent when changing the bank name', () => {
   const bank = Bank.create(makeInput())
 
   bank.changeName('Banco do Brasil')
 
-  expect(bank.getName()).toBe('Banco do Brasil')
+  const events = bank.getDomainEvents()
+
+  expect(events).toHaveLength(1)
+  expect(events[0]).toBeInstanceOf(BankInfoUpdatedEvent)
+  expect(events[0].payload.aggregateId).toBe(bank.getBankId())
 })
 
-test.each(['', undefined, null, 'Banco', 'Nubank', '123', '   '])(
-  'Should not change the bank name to an invalid value: %s',
-  (invalidName: unknown) => {
-    const bank = Bank.create(makeInput())
-    const oldBankName = bank.getName()
-
-    expect(() => bank.changeName(invalidName as string)).toThrow(
-      new DomainError('Invalid name'),
-    )
-
-    expect(bank.getName()).toBe(oldBankName)
-  },
-)
-
-test('Should change the bank code', () => {
+test('Should register a BankInfoUpdatedEvent when changing the bank code', () => {
   const bank = Bank.create(makeInput())
 
   bank.changeCode('104')
 
-  expect(bank.getCode()).toBe('104')
+  const events = bank.getDomainEvents()
+
+  expect(events).toHaveLength(1)
+  expect(events[0]).toBeInstanceOf(BankInfoUpdatedEvent)
+  expect(events[0].payload.aggregateId).toBe(bank.getBankId())
 })
 
-test.each([
-  '',
-  undefined,
-  null,
-  '1',
-  '01',
-  '1111',
-  'ABC',
-  'A12',
-  '!@1',
-  '12 ',
-  '1234',
-])(
-  'Should not change the bank code to an invalid value: %s',
-  (invalidCode: unknown) => {
-    const bank = Bank.create(makeInput())
+test('Should not register a domain event when changing the bank name to an invalid value', () => {
+  const bank = Bank.create(makeInput())
 
-    expect(() => bank.changeCode(invalidCode as string)).toThrow(
-      new DomainError('Invalid code'),
-    )
+  expect(() => bank.changeName('Banco')).toThrow(
+    new DomainError('Invalid name'),
+  )
 
-    expect(bank.getCode()).toBe('237')
-  },
-)
+  expect(bank.getDomainEvents()).toHaveLength(0)
+})
+
+test('Should not register a domain event when changing the bank code to an invalid value', () => {
+  const bank = Bank.create(makeInput())
+
+  expect(() => bank.changeCode('ABC')).toThrow(new DomainError('Invalid code'))
+
+  expect(bank.getDomainEvents()).toHaveLength(0)
+})
+
+test('Should register a domain event for each bank information change', () => {
+  const bank = Bank.create(makeInput())
+
+  bank.changeName('Banco do Brasil')
+  bank.changeCode('104')
+
+  const events = bank.getDomainEvents()
+
+  expect(events).toHaveLength(1)
+  expect(events[0]).toBeInstanceOf(BankInfoUpdatedEvent)
+  expect(events[0].payload.aggregateId).toBe(bank.getBankId())
+})

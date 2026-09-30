@@ -3,6 +3,7 @@ import { BankRestController } from '@adapters/database/controllers/bank-rest-con
 import { BankDAOSQL } from '@adapters/database/DAOs/bank-dao-sql.ts'
 import { ApplicationDependenciesRepository } from '@adapters/database/repositories/application-dependencies-repository.ts'
 import { BankRepositoryDatabase } from '@adapters/database/repositories/bank-repository-database.ts'
+import { EventPublisher } from '@application/event-publisher.ts'
 import { CreateBank } from '@application/usecases/create-bank.ts'
 import { GetApplicationStatus } from '@application/usecases/get-application-status.ts'
 import { GetBankById } from '@application/usecases/get-bank-by-id.ts'
@@ -12,6 +13,10 @@ import { UpdateBank } from '@application/usecases/update-bank.ts'
 import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 import { GracefulShutdown } from '@external/graceful-shutdown.ts'
 import { ExpressAdapter } from '@external/http/express-adapter.ts'
+
+const eventPublisher: EventPublisher = {
+  async publishAll() {},
+}
 
 const databaseConnection = new MysqlAdapter(
   String(process.env.DATABASE_MYSQL_URL),
@@ -52,7 +57,8 @@ const httpRestServer = new ExpressAdapter()
 const getBankList = new GetBankList(bankRepository)
 const getBankById = new GetBankById(bankRepository)
 const createBank = new CreateBank(bankRepository)
-const updateBank = new UpdateBank(bankRepository)
+
+const updateBank = new UpdateBank(bankRepository, eventPublisher)
 const removeBank = new RemoveBank(bankRepository)
 
 new BankRestController(
