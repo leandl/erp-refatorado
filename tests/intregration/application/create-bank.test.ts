@@ -1,16 +1,23 @@
 import { ApplicationError } from '@application/errors/application-error.ts'
+import { EventPublisher } from '@application/event-publisher.ts'
+import { BankCreatedEvent } from '@application/events/bank-created-event.ts'
 import { BankRepository } from '@application/repositories/bank-repository.ts'
 import { CreateBank } from '@application/usecases/create-bank.ts'
 import { DomainError } from '@domain/errors/domain-error.ts'
+import Sinon from 'sinon'
 
 import { BankRepositoryFake } from '../../mocks/bank-repository-fake.ts'
 
 let bankRepository: BankRepository
+let eventPublisher: EventPublisher
 let sut: CreateBank
 
 beforeEach(() => {
   bankRepository = new BankRepositoryFake()
-  sut = new CreateBank(bankRepository)
+  eventPublisher = {
+    async publishAll() {},
+  }
+  sut = new CreateBank(bankRepository, eventPublisher)
 })
 
 const makeInput = (overrides = {}) => ({
@@ -149,4 +156,21 @@ test('Should allow same url for different banks', async () => {
       }),
     ),
   ).resolves.toBeDefined()
+})
+
+test('Should publish BankCreatedEvent when a bank is created', async () => {
+  const input = makeInput({
+    code: '001',
+    name: 'Banco Teste',
+    url: 'https://bank.com',
+  })
+
+  const eventPublisherAllSpy = Sinon.spy(eventPublisher, 'publishAll')
+
+  await sut.execute(input)
+
+  expect(eventPublisherAllSpy.calledOnce).toBeTruthy()
+  expect(
+    eventPublisherAllSpy.calledWith([Sinon.match.instanceOf(BankCreatedEvent)]),
+  ).toBeTruthy()
 })

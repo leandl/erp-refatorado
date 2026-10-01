@@ -1,4 +1,6 @@
 import { ApplicationError } from '@application/errors/application-error.ts'
+import { EventPublisher } from '@application/event-publisher.ts'
+import { BankCreatedEvent } from '@application/events/bank-created-event.ts'
 import { BankRepository } from '@application/repositories/bank-repository.ts'
 import { Bank } from '@domain/entities/bank.ts'
 
@@ -8,7 +10,10 @@ export class CreateBank implements UseCase<
   CreateBank.Input,
   CreateBank.Output
 > {
-  constructor(private repository: BankRepository) {}
+  constructor(
+    private repository: BankRepository,
+    private eventPublisher: EventPublisher,
+  ) {}
 
   async execute(input: CreateBank.Input): Promise<CreateBank.Output> {
     const bank = Bank.create({
@@ -28,6 +33,11 @@ export class CreateBank implements UseCase<
     }
 
     const bankSeved = await this.repository.save(bank)
+
+    const applicationEvent = new BankCreatedEvent({
+      bankId: bankSeved.getBankId(),
+    })
+    await this.eventPublisher.publishAll([applicationEvent])
 
     return {
       id: bankSeved.getBankId(),
