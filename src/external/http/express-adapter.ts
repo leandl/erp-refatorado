@@ -59,9 +59,15 @@ export class ExpressAdapter implements HttpRestServer {
     if (this.serverInstance) return
 
     this.serverInstance = this.app.listen(port, (err) => {
-      if (!err) {
-        console.log(`Server running with express at http://localhost:${port}`)
+      if (err) {
+        console.error(
+          `Error on try listen on port ${port} with express, error: `,
+          err,
+        )
+        return process.exit(1)
       }
+
+      console.log(`Server running with express at http://localhost:${port}`)
     })
   }
 

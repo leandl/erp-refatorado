@@ -54,17 +54,29 @@ export class HonoAdapter implements HttpRestServer {
   listen(port: number): void {
     if (this.serverInstance) return
 
-    const server = serve(
-      {
-        fetch: this.app.fetch,
-        port,
-      },
-      function () {
-        console.log(`Server running with hono at http://localhost:${port}`)
-      },
-    )
+    try {
+      const server = serve(
+        {
+          fetch: this.app.fetch,
+          port,
+        },
+        (info) => {
+          console.log(
+            `Server running with hono at http://localhost:${info.port}`,
+          )
+        },
+      )
 
-    this.serverInstance = server
+      server.on('error', (error: unknown) => {
+        console.error(`Failed to start Hono server on port ${port}`, error)
+      })
+
+      this.serverInstance = server
+    } catch (error: unknown) {
+      throw new Error(`Failed to start Hono server on port ${port}`, {
+        cause: error,
+      })
+    }
   }
 
   async close(): Promise<void> {
