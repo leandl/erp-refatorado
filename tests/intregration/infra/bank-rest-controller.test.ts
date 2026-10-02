@@ -1,4 +1,4 @@
-import { BankRestController } from '@adapters/database/controllers/bank-rest-controller.ts'
+import { BankRestController } from '@adapters/controllers/bank-rest-controller.ts'
 import { HttpRestServer } from '@adapters/http/http-rest-server.ts'
 import { CreateBank } from '@application/usecases/create-bank.ts'
 import { GetBankById } from '@application/usecases/get-bank-by-id.ts'

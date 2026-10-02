@@ -1,9 +1,11 @@
-import { ApplicationStatusRestController } from '@adapters/database/controllers/application-status-rest-controller.ts'
-import { BankRestController } from '@adapters/database/controllers/bank-rest-controller.ts'
+import { ApplicationStatusRestController } from '@adapters/controllers/application-status-rest-controller.ts'
+import { BankEventQueueController } from '@adapters/controllers/bank-event-queue-controller.ts'
+import { BankRestController } from '@adapters/controllers/bank-rest-controller.ts'
 import { BankDAOSQL } from '@adapters/database/DAOs/bank-dao-sql.ts'
 import { ApplicationDependenciesRepository } from '@adapters/database/repositories/application-dependencies-repository.ts'
 import { BankRepositoryDatabase } from '@adapters/database/repositories/bank-repository-database.ts'
-import { EventPublisher } from '@application/event-publisher.ts'
+import { EventPublisherQueue } from '@adapters/event-publisher-queue.ts'
+import { Queue } from '@adapters/queue.ts'
 import { CreateBank } from '@application/usecases/create-bank.ts'
 import { GetApplicationStatus } from '@application/usecases/get-application-status.ts'
 import { GetBankById } from '@application/usecases/get-bank-by-id.ts'
@@ -14,9 +16,14 @@ import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 import { GracefulShutdown } from '@external/graceful-shutdown.ts'
 import { ExpressAdapter } from '@external/http/express-adapter.ts'
 
-const eventPublisher: EventPublisher = {
-  async publishAll() {},
+const queue: Queue<any> = {
+  async publish() {},
+  async consume() {},
 }
+
+new BankEventQueueController(queue)
+
+const eventPublisher = new EventPublisherQueue(queue)
 
 const databaseConnection = new MysqlAdapter(
   String(process.env.DATABASE_MYSQL_URL),

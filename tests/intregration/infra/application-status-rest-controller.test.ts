@@ -1,4 +1,4 @@
-import { ApplicationStatusRestController } from '@adapters/database/controllers/application-status-rest-controller.ts'
+import { ApplicationStatusRestController } from '@adapters/controllers/application-status-rest-controller.ts'
 import { HttpRestServer } from '@adapters/http/http-rest-server.ts'
 import { GetApplicationStatus } from '@application/usecases/get-application-status.ts'
 import Sinon from 'sinon'
