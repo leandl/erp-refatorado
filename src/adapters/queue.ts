@@ -8,6 +8,6 @@ export interface Queue<
 
   consume<K extends keyof Events>(
     eventName: K,
-    handler: (payload: Events[K]) => Promise<void>,
+    handler: (payload: Events[K]) => Promise<void> | void,
   ): Promise<void>
 }

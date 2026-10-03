@@ -15,11 +15,9 @@ import { UpdateBank } from '@application/usecases/update-bank.ts'
 import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 import { GracefulShutdown } from '@external/graceful-shutdown.ts'
 import { ExpressAdapter } from '@external/http/express-adapter.ts'
+import { MediatorQueueAdapter } from '@external/queue/mediator-queue-adapter.ts'
 
-const queue: Queue<any> = {
-  async publish() {},
-  async consume() {},
-}
+const queue: Queue<any> = new MediatorQueueAdapter<any>()
 
 new BankEventQueueController(queue)
 
