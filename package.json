@@ -4,8 +4,8 @@
   "description": "",
   "main": "src/main.ts",
   "scripts": {
-    "build": "tsup --tsconfig tsconfig.build.json src/main.ts",
-    "start": "node dist/main.cjs",
+    "build": "tsup --tsconfig tsconfig.build.json src/main.ts --format esm",
+    "start": "node dist/main.js",
     "dev:app:run": "tsx --env-file .env.dev --watch src/main.ts",
     "dev": "npm run services:up && npm run services:wait:database && npm run db:migrate && npm run services:wait:queue && npm run dev:app:run",
     "test": "npm run services:up && concurrently -n app,test --hide app -k --success command-test \"npm run dev:app:run\" \"vitest run --passWithNoTests\"",
