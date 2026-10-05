@@ -15,9 +15,14 @@ import { UpdateBank } from '@application/usecases/update-bank.ts'
 import { MysqlAdapter } from '@external/database/mysql-adapter.ts'
 import { GracefulShutdown } from '@external/graceful-shutdown.ts'
 import { ExpressAdapter } from '@external/http/express-adapter.ts'
-import { MediatorQueueAdapter } from '@external/queue/mediator-queue-adapter.ts'
+import { RabbitMQueueAdapter } from '@external/queue/rabbit-mqueue-adapter.ts'
 
-const queue: Queue<any> = new MediatorQueueAdapter<any>()
+// const queue = new MediatorQueueAdapter() as Queue<any>
+const queue = new RabbitMQueueAdapter(
+  process.env.QUEUE_RABBITMQ_URI!,
+) as Queue<any>
+
+await queue.connect()
 
 new BankEventQueueController(queue)
 
@@ -90,6 +95,7 @@ const gracefulShutdown = new GracefulShutdown([
   () => httpRestServer.close(),
   () => databaseConnection.close(),
   // () => dataSource.disconnect(),
+  () => queue.disconnect(),
 ])
 
 gracefulShutdown.register()

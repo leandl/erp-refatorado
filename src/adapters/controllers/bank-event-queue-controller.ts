@@ -10,13 +10,13 @@ type BankEventMap = {
 export class BankEventQueueController {
   constructor(queue: Queue<BankEventMap>) {
     queue.consume(BankCreatedEvent.EVENT_NAME, async (payload) => {
-      // chamar usecase
-      console.log(BankCreatedEvent.EVENT_NAME, { payload })
+      // // chamar usecase
+      // console.log(BankCreatedEvent.EVENT_NAME, { payload })
     })
 
     queue.consume(BankInfoUpdatedEvent.EVENT_NAME, async (payload) => {
-      // chamar usecase
-      console.log(BankInfoUpdatedEvent.EVENT_NAME, { payload })
+      // // chamar usecase
+      // console.log(BankInfoUpdatedEvent.EVENT_NAME, { payload })
     })
   }
 }

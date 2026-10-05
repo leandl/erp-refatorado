@@ -7,7 +7,7 @@
     "build": "tsup --tsconfig tsconfig.build.json src/main.ts",
     "start": "node dist/main.cjs",
     "dev:app:run": "tsx --env-file .env.dev --watch src/main.ts",
-    "dev": "npm run services:up && npm run services:wait:database && npm run db:migrate && npm run dev:app:run",
+    "dev": "npm run services:up && npm run services:wait:database && npm run db:migrate && npm run services:wait:queue && npm run dev:app:run",
     "test": "npm run services:up && concurrently -n app,test --hide app -k --success command-test \"npm run dev:app:run\" \"vitest run --passWithNoTests\"",
     "posttest": "npm run services:stop",
     "test:watch": "vitest --passWithNoTests",
@@ -18,7 +18,8 @@
     "services:up": "docker compose --env-file .env.dev -f infra/compose.yaml up -d",
     "services:stop": "docker compose --env-file .env.dev -f infra/compose.yaml stop",
     "services:down": "docker compose --env-file .env.dev -f infra/compose.yaml down",
-    "services:wait:database": "node ./infra/scripts/wait-for-database.js"
+    "services:wait:database": "node ./infra/scripts/wait-for-database.js",
+    "services:wait:queue": "node ./infra/scripts/wait-for-queue.js"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,7 @@
   "type": "module",
   "devDependencies": {
     "@rocketseat/eslint-config": "^2.2.2",
+    "@types/amqplib": "^0.10.8",
     "@types/async-retry": "^1.4.9",
     "@types/better-sqlite3": "^9.6.0",
     "@types/cors": "^2.8.19",
@@ -62,6 +64,7 @@
     "@hono/node-server": "^2.1.1",
     "@prisma/adapter-mariadb": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "amqplib": "^2.2.0",
     "better-sqlite3": "^13.0.2",
     "cors": "^2.8.6",
     "drizzle-orm": "^1.0.0-rc.4",
